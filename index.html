@@ -71,6 +71,11 @@
 
       <!-- Navigation & View Switcher -->
       <div class="flex items-center gap-2 sm:gap-4">
+        <!-- WhatsApp Quick Contact Button (Supports Egypt 002 & KSA 966) -->
+        <button onclick="openWhatsAppChat()" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-emerald-600 text-white flex items-center gap-2 transition hover:bg-emerald-700 shadow">
+          <i class="fa-brands fa-whatsapp text-base"></i> <span class="hidden sm:inline">واتساب الإدارة</span>
+        </button>
+
         <!-- Customer Account Profile Button -->
         <button onclick="openCustomerAuthModal()" id="customerAuthBtn" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-gold/20 text-brand-gold border border-brand-gold/40 flex items-center gap-2 transition hover:bg-brand-gold/30">
           <i class="fa-solid fa-user-circle"></i> <span id="customerAuthLabel" class="hidden sm:inline">تسجيل العميل</span>
@@ -130,7 +135,7 @@
           <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
           <div>
             <h2 class="font-bold text-base text-brand-gold">لوحة الإدارة المباشرة (مسجل دخول: ASA)</h2>
-            <p class="text-xs text-slate-400">متابعة المستودع، الشات الفوري للإدارة، والطلبات</p>
+            <p class="text-xs text-slate-400">متابعة المستودع، شات العملاء المنفصل، والطلبات</p>
           </div>
         </div>
         <button onclick="logoutAdmin()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition">
@@ -144,16 +149,16 @@
           <i class="fa-solid fa-boxes-packing"></i> طلبات الشحنات <span id="pendingBadge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchAdminTab('adminChat')" id="tabBtnAdminChat" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 relative">
-          <i class="fa-solid fa-comments"></i> شات العملاء <span id="adminChatTabBadge" class="hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+          <i class="fa-solid fa-comments"></i> شات العملاء المنفصل <span id="adminChatTabBadge" class="hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchAdminTab('inventory')" id="tabBtnInventory" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
           <i class="fa-solid fa-warehouse"></i> المستودع والصور
         </button>
         <button onclick="switchAdminTab('customers')" id="tabBtnCustomers" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-users"></i> العملاء الجدد <span id="customerBadge" class="bg-brand-burgundy text-white text-xs px-2 py-0.5 rounded-full">0</span>
+          <i class="fa-solid fa-users"></i> إدارة العملاء <span id="customerBadge" class="bg-brand-burgundy text-white text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchAdminTab('banners')" id="tabBtnBanners" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-image"></i> إدارة البنرات والصور
+          <i class="fa-solid fa-image"></i> إدارة البنرات
         </button>
       </div>
 
@@ -175,30 +180,39 @@
                   <th class="p-3">إجراءات</th>
                 </tr>
               </thead>
-              <tbody id="adminOrdersTable">
-                <!-- Dynamic Orders -->
-              </tbody>
+              <tbody id="adminOrdersTable"></tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 2: Admin Live Chat Tab -->
+      <!-- TAB 2: Admin Separate Client Chat Tab -->
       <div id="tabAdminChat" class="hidden space-y-4">
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col h-[500px]">
-          <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2 border-b pb-2">
-            <i class="fa-solid fa-headset text-brand-burgundy"></i> مركز خدمة العملاء والشات المباشر (إشعارات فورية)
-          </h3>
-          <!-- Messages Box -->
-          <div id="adminLiveChatBody" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 rounded-xl text-xs border">
-            <!-- Messages Display -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 h-[550px]">
+          <!-- Customers List for Chat Selection -->
+          <div class="bg-white rounded-xl p-3 shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+            <h4 class="font-bold text-xs text-slate-800 mb-2 pb-2 border-b"><i class="fa-solid fa-user-group text-brand-burgundy"></i> اختر عميلاً للمحادثة</h4>
+            <div id="adminChatCustomersList" class="flex-1 overflow-y-auto space-y-2">
+              <!-- Customers list populated dynamically -->
+            </div>
           </div>
-          <!-- Reply Input -->
-          <div class="mt-3 flex gap-2 pt-2 border-t">
-            <input type="text" id="adminReplyInput" placeholder="اكتب رد الإدارة للعميل..." class="flex-1 border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendAdminReply()">
-            <button onclick="sendAdminReply()" class="bg-brand-burgundy text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-dark">
-              <i class="fa-solid fa-paper-plane ml-1"></i> إرسال رد
-            </button>
+          <!-- Chat Box for Selected Customer -->
+          <div class="md:col-span-2 bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col justify-between">
+            <div class="border-b pb-2 mb-2 flex justify-between items-center">
+              <h4 id="activeChatTitle" class="font-bold text-xs text-brand-burgundy">اختر عميلاً من القائمة لعرض المحادثة</h4>
+              <span id="activeChatMobile" class="text-[10px] text-slate-500"></span>
+            </div>
+            <!-- Messages Area -->
+            <div id="adminSelectedChatBody" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 rounded-xl text-xs border mb-3">
+              <div class="text-center text-slate-400 py-10">الرجاء اختيار عميل لعرض الرسائل والرد عليه.</div>
+            </div>
+            <!-- Reply Input -->
+            <div class="flex gap-2 pt-2 border-t">
+              <input type="text" id="adminReplyInput" placeholder="اكتب رد الإدارة لهذا العميل..." class="flex-1 border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendAdminReplyToActiveCustomer()">
+              <button onclick="sendAdminReplyToActiveCustomer()" class="bg-brand-burgundy text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-dark">
+                <i class="fa-solid fa-paper-plane ml-1"></i> إرسال رد
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -223,31 +237,28 @@
                 <th class="p-3">إجراء</th>
               </tr>
             </thead>
-            <tbody id="adminInventoryTable">
-              <!-- Inventory Items -->
-            </tbody>
+            <tbody id="adminInventoryTable"></tbody>
           </table>
         </div>
       </div>
 
-      <!-- TAB 4: Customers -->
+      <!-- TAB 4: Customers Management (With Edit & Delete buttons) -->
       <div id="tabCustomers" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-          <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-address-book text-brand-burgundy"></i> قائمة العملاء المسجلين الجدد</h3>
+          <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-address-book text-brand-burgundy"></i> قائمة العملاء المسجلين (تعديل وحذف)</h3>
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-right text-slate-600">
               <thead class="bg-slate-100 text-slate-800 font-bold border-b">
                 <tr>
                   <th class="p-3">اسم العميل</th>
                   <th class="p-3">رقم الجوال</th>
-                  <th class="p-3">رقم الهاتف</th>
+                  <th class="p-3">الهاتف البديل</th>
                   <th class="p-3">العنوان</th>
                   <th class="p-3">التاريخ</th>
+                  <th class="p-3">إجراءات التحكم</th>
                 </tr>
               </thead>
-              <tbody id="adminCustomersTable">
-                <!-- Customers -->
-              </tbody>
+              <tbody id="adminCustomersTable"></tbody>
             </table>
           </div>
         </div>
@@ -264,15 +275,13 @@
             <i class="fa-solid fa-plus ml-1"></i> إضافة بنر جديد
           </button>
         </div>
-        <div id="adminBannersList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Banners -->
-        </div>
+        <div id="adminBannersList" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
       </div>
     </section>
 
   </main>
 
-  <!-- CHAT WIDGET (FLOATING) -->
+  <!-- CHAT WIDGET (FLOATING - EXCLUSIVE FOR CUSTOMER VIEW) -->
   <div id="chatWidget" class="fixed bottom-4 left-4 z-50">
     <button onclick="toggleChatWindow()" class="relative gold-gradient text-brand-dark font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition transform">
       <i class="fa-solid fa-comments text-xl"></i>
@@ -295,7 +304,7 @@
       <div id="chatBody" class="flex-1 p-3 overflow-y-auto space-y-3 text-xs bg-slate-50">
         <div class="bg-slate-200 text-slate-800 p-2.5 rounded-xl rounded-tr-none max-w-[85%]">
           مرحباً بك في شركة **كيو عطور وتجميل**! 🌸 
-          تحدث معنا مباشرة أو أرسل استفسارك وسنرد عليك فوراً.
+          يرجى تسجيل بياناتك أولاً من زر "تسجيل العميل" بالأعلى لتبدأ المحادثة المباشرة الخاصة بك.
         </div>
       </div>
 
@@ -345,11 +354,12 @@
       <button onclick="closeCustomerAuthModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       <div class="text-center mb-4">
         <div class="w-12 h-12 rounded-full bg-brand-burgundy mx-auto flex items-center justify-center text-white text-xl font-bold mb-2 shadow"><i class="fa-solid fa-user-plus"></i></div>
-        <h3 class="font-bold text-lg text-slate-800">تسجيل عميل جديد</h3>
+        <h3 class="font-bold text-lg text-slate-800" id="customerModalTitle">تسجيل عميل جديد</h3>
         <p class="text-xs text-slate-500">أدخل بياناتك لتصل للإدارة</p>
       </div>
 
       <div class="space-y-3 text-xs">
+        <input type="hidden" id="editCustomerIndex" value="-1">
         <div>
           <label class="font-bold block mb-1">الاسم الكامل</label>
           <input type="text" id="custName" placeholder="أدخل اسمك" class="w-full border p-2 rounded-lg">
@@ -366,8 +376,8 @@
           <label class="font-bold block mb-1">العنوان بالتفصيل</label>
           <textarea id="custAddress" placeholder="المدينة، الحي، الشارع..." class="w-full border p-2 rounded-lg h-16"></textarea>
         </div>
-        <button onclick="registerCustomer()" class="w-full bg-brand-burgundy text-white font-bold py-2.5 rounded-lg mt-2 text-sm shadow hover:bg-brand-dark">
-          تأكيد التسجيل وإرسال البيانات للإدارة
+        <button onclick="saveCustomerData()" class="w-full bg-brand-burgundy text-white font-bold py-2.5 rounded-lg mt-2 text-sm shadow hover:bg-brand-dark">
+          حفظ وتأكيد البيانات
         </button>
       </div>
     </div>
@@ -410,7 +420,7 @@
     </div>
   </div>
 
-  <!-- ADD PRODUCT MODAL (ADMIN - WITH DEVICE IMAGE SELECTOR) -->
+  <!-- ADD PRODUCT MODAL -->
   <div id="addProductModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-3 mb-4">
@@ -453,7 +463,7 @@
     </div>
   </div>
 
-  <!-- ADD BANNER MODAL (ADMIN - WITH DEVICE IMAGE SELECTOR) -->
+  <!-- ADD BANNER MODAL -->
   <div id="addBannerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex justify-between items-center border-b pb-3 mb-4">
@@ -484,7 +494,6 @@
 
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
-    // Shared Data Store
     let products = [
       { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80", description: "عطر فاخر يجمع بين نفحات العود الملكي والمسك الأسود." },
       { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80", description: "مزيج ساحر من الورد الجوري والباستيل مع الفانيليا." }
@@ -503,14 +512,16 @@
       { id: 'ORD-8921', customerName: 'أحمد محمود', items: 'عطر كيو الملكي x1', total: 1200, payMethod: 'فودافون كاش', status: 'جديد' }
     ];
 
-    // Live Chat Store
-    let chatMessages = [
-      { sender: 'العميل', text: 'مرحباً، هل يتوفر لديكم عطر كيو الملكي للتوصيل اليوم؟', type: 'user', time: '10:00 ص' }
-    ];
+    // Separate Client Chat Store: { customerMobile: [ {sender, text, type, time}, ... ] }
+    let clientChats = {
+      '01012345678': [
+        { sender: 'محمد عبد الله', text: 'مرحباً، هل يتوفر لديكم عطر كيو الملكي للتوصيل اليوم؟', type: 'user', time: '10:00 ص' }
+      ]
+    };
 
-    let unreadMessagesCount = 1;
+    let currentCustomer = null; // Currently logged in customer object
+    let activeChatMobile = null; // Currently selected customer in Admin panel chat
     let isAdminLoggedIn = false;
-    let currentCustomer = null;
     let deferredPrompt;
 
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -533,7 +544,7 @@
       renderInventory();
       renderCustomers();
       renderAdminBanners();
-      renderChatMessages();
+      renderAdminChatCustomersList();
     });
 
     function switchView(view) {
@@ -546,10 +557,7 @@
         document.getElementById('adminView').classList.remove('hidden');
         document.getElementById('btnViewAdmin').classList.add('bg-brand-gold', 'text-brand-dark');
         document.getElementById('btnViewStore').classList.remove('bg-brand-gold', 'text-brand-dark');
-        
-        // Clear admin unread badge when admin opens chat tab
-        unreadMessagesCount = 0;
-        updateAdminNotifications();
+        renderAdminChatCustomersList();
       } else {
         document.getElementById('adminView').classList.add('hidden');
         document.getElementById('storeView').classList.remove('hidden');
@@ -577,26 +585,81 @@
       switchView('store');
     }
 
-    function openCustomerAuthModal() { document.getElementById('customerAuthModal').classList.remove('hidden'); }
+    // WhatsApp Direct Contact (Supports Egypt 002 & KSA 966)
+    function openWhatsAppChat() {
+      // Prompt or select country code default to KSA 966 or Egypt 002
+      let phoneNum = prompt("أدخل رقم الواتساب للتواصل (مثال: 9665xxxxxxxx أو 00201xxxxxxxxx):", "966500000000");
+      if (phoneNum) {
+        phoneNum = phoneNum.replace(/\D/g,'');
+        window.open(`https://wa.me/${phoneNum}?text=مرحباً، أريد الاستفسار عن منتجات كيو عطور وتجميل`, '_blank');
+      }
+    }
+
+    // Customer Registration & Management
+    function openCustomerAuthModal() {
+      document.getElementById('editCustomerIndex').value = "-1";
+      document.getElementById('customerModalTitle').innerText = "تسجيل عميل جديد";
+      document.getElementById('custName').value = "";
+      document.getElementById('custMobile').value = "";
+      document.getElementById('custPhone').value = "";
+      document.getElementById('custAddress').value = "";
+      document.getElementById('customerAuthModal').classList.remove('hidden');
+    }
     function closeCustomerAuthModal() { document.getElementById('customerAuthModal').classList.add('hidden'); }
 
-    function registerCustomer() {
+    function saveCustomerData() {
+      const editIdx = parseInt(document.getElementById('editCustomerIndex').value);
       const name = document.getElementById('custName').value.trim();
       const mobile = document.getElementById('custMobile').value.trim();
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
 
-      if (!name || !mobile || !address) { alert('يرجى إدخال البيانات الأساسية.'); return; }
+      if (!name || !mobile || !address) { alert('يرجى إدخال الاسم، رقم الجوال، والعنوان.'); return; }
 
-      currentCustomer = { name, mobile, phone, address, date: new Date().toLocaleDateString('ar-EG') };
-      customers.push(currentCustomer);
+      if (editIdx === -1) {
+        // New Customer
+        currentCustomer = { name, mobile, phone, address, date: new Date().toLocaleDateString('ar-EG') };
+        customers.push(currentCustomer);
+        if (!clientChats[mobile]) clientChats[mobile] = [];
+        alert(`مرحباً بك يا ${name}! تم تسجيل حسابك بنجاح.`);
+      } else {
+        // Edit Existing Customer (Preserve info)
+        customers[editIdx].name = name;
+        customers[editIdx].mobile = mobile;
+        customers[editIdx].phone = phone;
+        customers[editIdx].address = address;
+        currentCustomer = customers[editIdx];
+        alert('تم تعديل بيانات العميل بنجاح دون فقدان أي معلومات.');
+      }
+
       renderCustomers();
-
-      document.getElementById('customerAuthLabel').innerText = name;
+      document.getElementById('customerAuthLabel').innerText = currentCustomer.name;
       closeCustomerAuthModal();
-      alert(`مرحباً بك يا ${name}! تم تسجيل حسابك.`);
+      renderChatMessages();
     }
 
+    // Edit customer from Admin Panel
+    function editCustomer(idx) {
+      const c = customers[idx];
+      document.getElementById('editCustomerIndex').value = idx;
+      document.getElementById('customerModalTitle').innerText = "تعديل بيانات العميل";
+      document.getElementById('custName').value = c.name;
+      document.getElementById('custMobile').value = c.mobile;
+      document.getElementById('custPhone').value = c.phone || '';
+      document.getElementById('custAddress').value = c.address;
+      document.getElementById('customerAuthModal').classList.remove('hidden');
+    }
+
+    // Delete customer from Admin Panel
+    function deleteCustomer(idx) {
+      if (confirm('هل أنت متأكد من حذف هذا العميل؟')) {
+        customers.splice(idx, 1);
+        renderCustomers();
+        renderAdminChatCustomersList();
+      }
+    }
+
+    // Render Banners & Products
     function renderBanners() {
       const container = document.getElementById('bannersContainer');
       container.innerHTML = '';
@@ -693,14 +756,15 @@
 
     function submitOrderToChat() {
       if (cart.length === 0) { alert('السلة فارغة!'); return; }
+      if (!currentCustomer) { alert('يرجى تسجيل بيانات العميل أولاً من زر "تسجيل العميل" في الأعلى!'); openCustomerAuthModal(); return; }
+      
       const payMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       let orderItemsText = cart.map(c => `${c.name} (x${c.qty})`).join(', ');
       let total = cart.reduce((a, c) => a + (c.price * c.qty), 0);
-      const customerNameStr = currentCustomer ? currentCustomer.name : 'عميل زائر';
       
       const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-        customerName: customerNameStr,
+        customerName: currentCustomer.name,
         items: orderItemsText,
         total: total,
         payMethod: payMethod,
@@ -710,8 +774,8 @@
       orders.push(newOrder);
       renderOrders();
 
-      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**\nالعميل: ${customerNameStr}\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}`;
-      addMessageToChat('العميل', chatMsg, 'user');
+      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}`;
+      addMessageToCurrentCustomer(currentCustomer.mobile, currentCustomer.name, chatMsg, 'user');
 
       cart = [];
       updateCartUI();
@@ -719,41 +783,40 @@
       toggleChatWindow();
     }
 
-    // Chat Logic & Notifications
+    // Chat Logic (Separate per Customer & Admin Sync)
     function toggleChatWindow() { document.getElementById('chatWindow').classList.toggle('hidden'); }
 
     function sendChatMessage() {
+      if (!currentCustomer) { alert('يرجى تسجيل بياناتك أولاً عبر زر "تسجيل العميل" في الأعلى لتتمكن من مراسلة الإدارة.'); openCustomerAuthModal(); return; }
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
-      addMessageToChat('العميل', text, 'user');
+      
+      addMessageToCurrentCustomer(currentCustomer.mobile, currentCustomer.name, text, 'user');
       input.value = '';
     }
 
-    function addMessageToChat(sender, text, type) {
+    function addMessageToCurrentCustomer(mobile, senderName, text, type) {
+      if (!clientChats[mobile]) clientChats[mobile] = [];
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      chatMessages.push({ sender, text, type, time: timeStr });
-      
-      if (type === 'user') {
-        unreadMessagesCount++;
-        updateAdminNotifications();
-      }
+      clientChats[mobile].push({ sender: senderName, text, type, time: timeStr });
 
       renderChatMessages();
+      renderAdminChatCustomersList();
+      if (activeChatMobile === mobile) {
+        renderAdminSelectedChatBody();
+      }
     }
 
     function renderChatMessages() {
-      // Customer window body
+      if (!currentCustomer) return;
       const body = document.getElementById('chatBody');
       body.innerHTML = '';
-      
-      // Admin live chat body
-      const adminBody = document.getElementById('adminLiveChatBody');
-      if (adminBody) adminBody.innerHTML = '';
+      const msgs = clientChats[currentCustomer.mobile] || [];
 
-      chatMessages.forEach(m => {
+      msgs.forEach(m => {
         const isUser = m.type === 'user';
-        const msgHtml = `
+        body.innerHTML += `
           <div class="${isUser ? 'bg-brand-burgundy text-white rounded-tl-none mr-auto' : 'bg-slate-200 text-slate-800 rounded-tr-none ml-auto'} p-2.5 rounded-xl max-w-[85%] mb-2">
             <div class="flex justify-between items-center mb-0.5 opacity-75 text-[9px]">
               <span>${m.sender}</span>
@@ -762,52 +825,99 @@
             <div>${m.text.replace(/\n/g, '<br>')}</div>
           </div>
         `;
-        body.innerHTML += msgHtml;
-        if (adminBody) adminBody.innerHTML += msgHtml;
       });
-
       body.scrollTop = body.scrollHeight;
-      if (adminBody) adminBody.scrollTop = adminBody.scrollHeight;
     }
 
     function handleChatFileUpload(input) {
+      if (!currentCustomer) { alert('يرجى تسجيل العميل أولاً'); openCustomerAuthModal(); return; }
       if (input.files && input.files[0]) {
         const file = input.files[0];
         const fileUrl = URL.createObjectURL(file);
-        addMessageToChat('العميل', `مرفق ملف (${file.name}):<br><img src="${fileUrl}" class="max-w-full h-32 object-cover rounded mt-1">`, 'user');
+        addMessageToCurrentCustomer(currentCustomer.mobile, currentCustomer.name, `مرفق ملف (${file.name}):<br><img src="${fileUrl}" class="max-w-full h-32 object-cover rounded mt-1">`, 'user');
       }
     }
 
-    function updateAdminNotifications() {
-      const badge = document.getElementById('adminNotificationBadge');
-      const tabBadge = document.getElementById('adminChatTabBadge');
-      const clientBadge = document.getElementById('clientChatBadge');
+    // Admin Chat Management per Customer
+    function renderAdminChatCustomersList() {
+      const listContainer = document.getElementById('adminChatCustomersList');
+      if (!listContainer) return;
+      listContainer.innerHTML = '';
 
-      if (unreadMessagesCount > 0) {
-        badge.innerText = unreadMessagesCount;
-        badge.classList.remove('hidden');
-        tabBadge.innerText = unreadMessagesCount;
-        tabBadge.classList.remove('hidden');
-        clientBadge.classList.add('hidden');
-      } else {
-        badge.classList.add('hidden');
-        tabBadge.classList.add('hidden');
-      }
+      let totalUnread = 0;
+
+      customers.forEach(c => {
+        const msgs = clientChats[c.mobile] || [];
+        const lastMsg = msgs.length > 0 ? msgs[msgs.length - 1].text : 'لا توجد رسائل بعد';
+        
+        listContainer.innerHTML += `
+          <div onclick="selectCustomerChat('${c.mobile}')" class="p-2.5 rounded-lg border cursor-pointer hover:bg-slate-100 transition ${activeChatMobile === c.mobile ? 'bg-brand-gold/10 border-brand-gold' : 'bg-white'}">
+            <div class="flex justify-between items-center font-bold text-slate-800 text-xs">
+              <span>${c.name}</span>
+              <span class="text-[10px] text-slate-400">${c.mobile}</span>
+            </div>
+            <p class="text-[10px] text-slate-500 truncate mt-1">${lastMsg}</p>
+          </div>
+        `;
+      });
     }
 
-    // Admin Reply from Panel
-    function sendAdminReply() {
+    function selectCustomerChat(mobile) {
+      activeChatMobile = mobile;
+      renderAdminChatCustomersList();
+      renderAdminSelectedChatBody();
+    }
+
+    function renderAdminSelectedChatBody() {
+      const adminBody = document.getElementById('adminSelectedChatBody');
+      const title = document.getElementById('activeChatTitle');
+      const mobileLabel = document.getElementById('activeChatMobile');
+      if (!adminBody) return;
+
+      if (!activeChatMobile) {
+        adminBody.innerHTML = '<div class="text-center text-slate-400 py-10">الرجاء اختيار عميل من القائمة الجانبية لعرض المحادثة.</div>';
+        return;
+      }
+
+      const cust = customers.find(c => c.mobile === activeChatMobile);
+      title.innerText = cust ? `محادثة العميل: ${cust.name}` : `محادثة رقم: ${activeChatMobile}`;
+      mobileLabel.innerText = `الجوال: ${activeChatMobile}`;
+
+      adminBody.innerHTML = '';
+      const msgs = clientChats[activeChatMobile] || [];
+
+      msgs.forEach(m => {
+        const isAdmin = m.type === 'admin';
+        adminBody.innerHTML += `
+          <div class="${isAdmin ? 'bg-brand-burgundy text-white rounded-tl-none mr-auto' : 'bg-slate-200 text-slate-800 rounded-tr-none ml-auto'} p-2.5 rounded-xl max-w-[85%] mb-2">
+            <div class="flex justify-between items-center mb-0.5 opacity-75 text-[9px]">
+              <span>${m.sender}</span>
+              <span>${m.time}</span>
+            </div>
+            <div>${m.text.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      });
+      adminBody.scrollTop = adminBody.scrollHeight;
+    }
+
+    function sendAdminReplyToActiveCustomer() {
+      if (!activeChatMobile) { alert('الرجاء اختيار عميل أولاً من القائمة!'); return; }
       const input = document.getElementById('adminReplyInput');
       const text = input.value.trim();
       if (!text) return;
-      
+
       const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      chatMessages.push({ sender: 'الإدارة (ASA)', text, type: 'admin', time: timeStr });
-      input.value = '';
+      if (!clientChats[activeChatMobile]) clientChats[activeChatMobile] = [];
       
-      renderChatMessages();
-      // Show unread notification on client side
-      document.getElementById('clientChatBadge').classList.remove('hidden');
+      clientChats[activeChatMobile].push({ sender: 'الإدارة (ASA)', text, type: 'admin', time: timeStr });
+      input.value = '';
+
+      renderAdminSelectedChatBody();
+      if (currentCustomer && currentCustomer.mobile === activeChatMobile) {
+        renderChatMessages();
+        document.getElementById('clientChatBadge').classList.remove('hidden');
+      }
     }
 
     // Admin Tabs & Management
@@ -884,7 +994,6 @@
     function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
     function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
 
-    // Save Product with Local File Image Selection
     function saveNewProduct() {
       const name = document.getElementById('newProdName').value;
       const cat = document.getElementById('newProdCat').value;
@@ -896,17 +1005,11 @@
       if (!name || isNaN(price)) { alert('يرجى كتابة الاسم والسعر الصحيح'); return; }
 
       let imageUrl = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80";
-      
       if (fileInput.files && fileInput.files[0]) {
         imageUrl = URL.createObjectURL(fileInput.files[0]);
-        addProductWithImage(name, cat, price, stock, desc, imageUrl);
-      } else {
-        addProductWithImage(name, cat, price, stock, desc, imageUrl);
       }
-    }
 
-    function addProductWithImage(name, cat, price, stock, desc, image) {
-      products.push({ id: Date.now(), name, category: cat, price, stock, image, description: desc });
+      products.push({ id: Date.now(), name, category: cat, price, stock, image: imageUrl, description: desc });
       renderInventory();
       renderProducts();
       closeAddProductModal();
@@ -916,7 +1019,7 @@
     function renderCustomers() {
       const tbody = document.getElementById('adminCustomersTable');
       tbody.innerHTML = '';
-      customers.forEach(c => {
+      customers.forEach((c, idx) => {
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
             <td class="p-3 font-bold text-slate-800">${c.name}</td>
@@ -924,6 +1027,10 @@
             <td class="p-3">${c.phone || '-'}</td>
             <td class="p-3">${c.address}</td>
             <td class="p-3 text-xs text-slate-500">${c.date}</td>
+            <td class="p-3 flex gap-2">
+              <button onclick="editCustomer(${idx})" class="bg-amber-500 text-white text-xs px-2 py-1 rounded font-bold hover:bg-amber-600">تعديل</button>
+              <button onclick="deleteCustomer(${idx})" class="bg-rose-600 text-white text-xs px-2 py-1 rounded font-bold hover:bg-rose-700">حذف</button>
+            </td>
           </tr>
         `;
       });
@@ -950,7 +1057,6 @@
     function openAddBannerModal() { document.getElementById('addBannerModal').classList.remove('hidden'); }
     function closeAddBannerModal() { document.getElementById('addBannerModal').classList.add('hidden'); }
 
-    // Save Banner with Local File Image Selection
     function saveNewBanner() {
       const title = document.getElementById('bannerTitle').value;
       const subtitle = document.getElementById('bannerSubtitle').value;
@@ -959,7 +1065,6 @@
       if (!title) { alert('يرجى كتابة عنوان البنر'); return; }
 
       let imageUrl = "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80";
-
       if (fileInput.files && fileInput.files[0]) {
         imageUrl = URL.createObjectURL(fileInput.files[0]);
       }
