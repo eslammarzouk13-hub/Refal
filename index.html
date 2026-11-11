@@ -43,7 +43,6 @@
     body { font-family: 'Tajawal', sans-serif; background-color: #FAF8F5; }
     .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 50%, #AA7C11 100%); }
     .dark-gradient { background: linear-gradient(135deg, #4A0E17 0%, #2A080C 100%); }
-    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
   </style>
 </head>
 <body class="bg-brand-bgLight min-h-screen text-slate-800 flex flex-col justify-between">
@@ -72,6 +71,11 @@
 
       <!-- Navigation & View Switcher -->
       <div class="flex items-center gap-2 sm:gap-4">
+        <!-- Customer Account Profile Button -->
+        <button onclick="openCustomerAuthModal()" id="customerAuthBtn" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-gold/20 text-brand-gold border border-brand-gold/40 flex items-center gap-2 transition hover:bg-brand-gold/30">
+          <i class="fa-solid fa-user-circle"></i> <span id="customerAuthLabel" class="hidden sm:inline">تسجيل العميل</span>
+        </button>
+
         <button onclick="switchView('store')" id="btnViewStore" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-gold text-brand-dark flex items-center gap-2 transition shadow">
           <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">متجر المشتريات</span>
         </button>
@@ -83,7 +87,7 @@
   </header>
 
   <!-- MAIN CONTAINER -->
-  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full space-y-6">
 
     <!-- CUSTOMER STORE VIEW -->
     <section id="storeView" class="space-y-6">
@@ -98,10 +102,6 @@
         </div>
         
         <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
-          <button onclick="toggleMediaAccessRequest()" class="bg-amber-50 text-amber-800 border border-amber-300 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-amber-100">
-            <i class="fa-solid fa-photo-film text-amber-600"></i> طلب صلاحية رؤية الصور والفيديو
-          </button>
-          
           <button onclick="toggleCartModal()" class="relative bg-brand-burgundy text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-brand-dark shadow">
             <i class="fa-solid fa-cart-shopping"></i> السلة
             <span id="cartCount" class="bg-brand-gold text-brand-dark rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold">0</span>
@@ -109,14 +109,9 @@
         </div>
       </div>
 
-      <!-- Banner -->
-      <div class="dark-gradient rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div class="z-10">
-          <span class="bg-brand-gold/20 text-brand-gold text-xs px-3 py-1 rounded-full font-bold border border-brand-gold/30">تشكيلة حصرية 2026</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 text-brand-goldLight">أفخم العطور وأدوات التجميل</h2>
-          <p class="text-sm text-slate-300 mt-1">تصفح المنتجات وأرسل طلبيتك مباشرة عبر الشات الفوري للتجهيز.</p>
-        </div>
-        <i class="fa-solid fa-gem text-6xl text-brand-gold/20 absolute left-4 bottom-2 z-0"></i>
+      <!-- Dynamic Banners Carousel / Grid -->
+      <div id="bannersContainer" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Dynamic Banners -->
       </div>
 
       <!-- Product Grid -->
@@ -133,7 +128,7 @@
           <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
           <div>
             <h2 class="font-bold text-base text-brand-gold">لوحة الإدارة المباشرة (مسجل دخول: ASA)</h2>
-            <p class="text-xs text-slate-400">متابعة المستودع، الطلبات، والشات مع العملاء</p>
+            <p class="text-xs text-slate-400">متابعة المستودع، الطلبات، العملاء، والبنرات الدعائية</p>
           </div>
         </div>
         <button onclick="logoutAdmin()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition">
@@ -142,15 +137,18 @@
       </div>
 
       <!-- Admin Tabs -->
-      <div class="flex border-b border-slate-200 bg-white rounded-t-xl px-4 gap-4">
+      <div class="flex flex-wrap border-b border-slate-200 bg-white rounded-t-xl px-4 gap-2">
         <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="py-3 px-4 text-sm font-bold border-b-2 border-brand-burgundy text-brand-burgundy flex items-center gap-2">
           <i class="fa-solid fa-boxes-packing"></i> طلبات الشحنات <span id="pendingBadge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchAdminTab('inventory')" id="tabBtnInventory" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-warehouse"></i> حركة المستودع والمنتجات
+          <i class="fa-solid fa-warehouse"></i> حركة المستودع
         </button>
-        <button onclick="switchAdminTab('permissions')" id="tabBtnPermissions" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-user-shield"></i> صلاحيات الوصول للوسائط
+        <button onclick="switchAdminTab('customers')" id="tabBtnCustomers" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-users"></i> عملاء المتجر الجدد <span id="customerBadge" class="bg-brand-burgundy text-white text-xs px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <button onclick="switchAdminTab('banners')" id="tabBtnBanners" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-image"></i> إدارة البنرات والعروض
         </button>
       </div>
 
@@ -183,9 +181,9 @@
       <!-- TAB 2: Inventory -->
       <div id="tabInventory" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
-          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-boxes-stacked text-brand-burgundy"></i> قائمة المخزون الحالي</h3>
+          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-boxes-stacked text-brand-burgundy"></i> قائمة المخزون الحالي (جميع الصور ظاهرة 100%)</h3>
           <button onclick="openAddProductModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">
-            <i class="fa-solid fa-plus ml-1"></i> إضافة منتج جديد
+            <i class="fa-solid fa-plus ml-1"></i> إضافة صنف جديد
           </button>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
@@ -207,14 +205,43 @@
         </div>
       </div>
 
-      <!-- TAB 3: Permissions -->
-      <div id="tabPermissions" class="hidden space-y-4">
+      <!-- TAB 3: Customers -->
+      <div id="tabCustomers" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
-          <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-users-gear text-brand-burgundy"></i> طلبات إتاحة مشاهدة ألبوم الصور والفيديو للعملاء</h3>
-          <p class="text-xs text-slate-500 mb-4">العملاء الذين طلبوا الوصول لمكتبة الوسائط الخاصة بعطور وتجميل كيو.</p>
-          <div id="mediaRequestsList" class="space-y-3">
-            <!-- Dynamic Media Requests -->
+          <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-address-book text-brand-burgundy"></i> قائمة العملاء المسجلين الجدد</h3>
+          <p class="text-xs text-slate-500 mb-4">تفاصيل العملاء الذين قاموا بالتسجيل في التطبيق (الاسم، الجوال، الهاتف، والعنوان).</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-right text-slate-600">
+              <thead class="bg-slate-100 text-slate-800 font-bold border-b">
+                <tr>
+                  <th class="p-3">اسم العميل</th>
+                  <th class="p-3">رقم الجوال</th>
+                  <th class="p-3">رقم الهاتف</th>
+                  <th class="p-3">العنوان</th>
+                  <th class="p-3">تاريخ التسجيل</th>
+                </tr>
+              </thead>
+              <tbody id="adminCustomersTable">
+                <!-- Dynamic Customers -->
+              </tbody>
+            </table>
           </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Banners Management -->
+      <div id="tabBanners" class="hidden space-y-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
+          <div>
+            <h3 class="font-bold text-slate-800"><i class="fa-solid fa-images text-brand-burgundy"></i> إدارة البنرات والعروض الترويجية</h3>
+            <p class="text-xs text-slate-500">إضافة أو حذف البنرات التي تظهر في واجهة المتجر الرئيسية.</p>
+          </div>
+          <button onclick="openAddBannerModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">
+            <i class="fa-solid fa-plus ml-1"></i> إضافة بنر جديد
+          </button>
+        </div>
+        <div id="adminBannersList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Dynamic Banners List -->
         </div>
       </div>
     </section>
@@ -223,14 +250,11 @@
 
   <!-- CHAT WIDGET (FLOATING) -->
   <div id="chatWidget" class="fixed bottom-4 left-4 z-50">
-    <!-- Chat Button -->
     <button onclick="toggleChatWindow()" class="gold-gradient text-brand-dark font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition transform">
       <i class="fa-solid fa-comments text-xl"></i>
       <span class="hidden sm:inline">شات الإدارة المباشرة</span>
-      <span id="unreadChatBadge" class="hidden bg-rose-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">1</span>
     </button>
 
-    <!-- Chat Window Modal -->
     <div id="chatWindow" class="hidden fixed bottom-20 left-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col h-[450px] overflow-hidden z-50">
       <div class="dark-gradient p-3 text-white flex justify-between items-center">
         <div class="flex items-center gap-2">
@@ -243,7 +267,6 @@
         <button onclick="toggleChatWindow()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
       </div>
 
-      <!-- Chat Body -->
       <div id="chatBody" class="flex-1 p-3 overflow-y-auto space-y-3 text-xs bg-slate-50">
         <div class="bg-slate-200 text-slate-800 p-2.5 rounded-xl rounded-tr-none max-w-[85%]">
           مرحباً بك في شركة **كيو عطور وتجميل**! 🌸 
@@ -251,7 +274,6 @@
         </div>
       </div>
 
-      <!-- Chat Input -->
       <div class="p-2 border-t bg-white flex items-center gap-2">
         <label class="cursor-pointer text-slate-400 hover:text-brand-burgundy px-1">
           <i class="fa-solid fa-paperclip text-lg"></i>
@@ -292,6 +314,40 @@
     </div>
   </div>
 
+  <!-- CUSTOMER REGISTRATION MODAL -->
+  <div id="customerAuthModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl relative border-t-4 border-brand-burgundy">
+      <button onclick="closeCustomerAuthModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 rounded-full bg-brand-burgundy mx-auto flex items-center justify-center text-white text-xl font-bold mb-2 shadow"><i class="fa-solid fa-user-plus"></i></div>
+        <h3 class="font-bold text-lg text-slate-800">تسجيل عميل جديد</h3>
+        <p class="text-xs text-slate-500">أدخل بياناتك لتصل للإدارة ويتم حفظ حسابك</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold block mb-1">الاسم الكامل</label>
+          <input type="text" id="custName" placeholder="أدخل اسمك" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">رقم الجوال</label>
+          <input type="text" id="custMobile" placeholder="05xxxxxxxx / 010xxxxxxxx" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">رقم الهاتف (الراضي / الأرضي / البديل)</label>
+          <input type="text" id="custPhone" placeholder="رقم الهاتف الإضافي" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">العنوان بالتفصيل</label>
+          <textarea id="custAddress" placeholder="المدينة، الحي، الشارع، رقم الحلة..." class="w-full border p-2 rounded-lg h-16"></textarea>
+        </div>
+        <button onclick="registerCustomer()" class="w-full bg-brand-burgundy text-white font-bold py-2.5 rounded-lg mt-2 text-sm shadow hover:bg-brand-dark">
+          تأكيد التسجيل وإرسال البيانات للإدارة
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- SHOPPING CART MODAL -->
   <div id="cartModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col max-h-[90vh]">
@@ -300,7 +356,6 @@
         <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       
-      <!-- Cart Items list -->
       <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
         <!-- Cart Items Dynamic -->
       </div>
@@ -320,7 +375,6 @@
         </div>
       </div>
 
-      <!-- Total & Checkout -->
       <div class="border-t pt-3 space-y-3">
         <div class="flex justify-between font-extrabold text-base text-slate-800">
           <span>المجموع الإجمالي:</span>
@@ -337,7 +391,7 @@
   <div id="addProductModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex justify-between items-center border-b pb-3 mb-4">
-        <h3 class="font-bold text-slate-800">إضافة صنف جديد للمستودع</h3>
+        <h3 class="font-bold text-slate-800">إضافة صنف عطور أو تجميل جديد</h3>
         <button onclick="closeAddProductModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs">
@@ -364,20 +418,35 @@
           </div>
         </div>
         <div>
-          <label class="font-bold block mb-1">رابط الصورة (URL)</label>
+          <label class="font-bold block mb-1">رابط الصورة (URL - ظاهرة تماماً للجميع)</label>
           <input type="text" id="newProdImg" placeholder="https://..." class="w-full border p-2 rounded-lg">
         </div>
-        <button onclick="saveNewProduct()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ المنتج في المستودع</button>
+        <button onclick="saveNewProduct()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ المنتج</button>
       </div>
     </div>
   </div>
 
-  <!-- MEDIA PREVIEW MODAL -->
-  <div id="mediaModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
-    <div class="max-w-2xl w-full bg-white rounded-2xl overflow-hidden relative">
-      <button onclick="closeMediaModal()" class="absolute top-3 right-3 bg-black/60 text-white w-8 h-8 rounded-full z-10"><i class="fa-solid fa-xmark"></i></button>
-      <div id="mediaModalContent" class="p-2 flex items-center justify-center bg-black min-h-[300px]">
-        <!-- Image/Video Dynamic -->
+  <!-- ADD BANNER MODAL (ADMIN) -->
+  <div id="addBannerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h3 class="font-bold text-slate-800">إضافة بنر / عرض جديد</h3>
+        <button onclick="closeAddBannerModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold block mb-1">عنوان البنر (مثال: عروض صيف 2026)</label>
+          <input type="text" id="bannerTitle" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">الوصف الفرعي</label>
+          <input type="text" id="bannerSubtitle" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">رابط صورة البنر (URL)</label>
+          <input type="text" id="bannerImg" placeholder="https://..." class="w-full border p-2 rounded-lg">
+        </div>
+        <button onclick="saveNewBanner()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ وعرض البنر</button>
       </div>
     </div>
   </div>
@@ -388,27 +457,33 @@
 
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
-    // System Initial Data
+    // Initial Data
     let products = [
-      { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, mediaAccessRequired: false, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80" },
-      { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, mediaAccessRequired: true, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80" },
-      { id: 3, name: "مجموعة العناية والتجميل المتكاملة", category: "تجميل وعناية", price: 1450, stock: 8, mediaAccessRequired: true, image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" },
-      { id: 4, name: "عطر العود والمسك الخاص", category: "عطور رجالية", price: 1800, stock: 10, mediaAccessRequired: false, image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500&q=80" }
+      { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80" },
+      { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80" },
+      { id: 3, name: "مجموعة العناية والتجميل المتكاملة", category: "تجميل وعناية", price: 1450, stock: 8, image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" },
+      { id: 4, name: "عطر العود والمسك الخاص", category: "عطور رجالية", price: 1800, stock: 10, image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500&q=80" }
+    ];
+
+    let banners = [
+      { id: 1, title: "أفخم العطور وأدوات التجميل", subtitle: "تصفح المنتجات وأرسل طلبيتك مباشرة عبر الشات الفوري.", image: "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80" },
+      { id: 2, title: "عروض خاصة وعصريّة 2026", subtitle: "تشكيلة مميزة من عطور كيو الحصرية.", image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=500&q=80" }
+    ];
+
+    let customers = [
+      { name: 'محمد عبد الله', mobile: '01012345678', phone: '02334455', address: 'القاهرة، شارع الهرم', date: '2026-11-11' }
     ];
 
     let cart = [];
     let orders = [
       { id: 'ORD-8921', customerName: 'أحمد محمود', items: 'عطر كيو الملكي x1', total: 1200, payMethod: 'فودافون كاش (Vodafone Cash)', status: 'جديد' }
     ];
-    let mediaRequests = [
-      { id: 101, name: 'عميل جديد (010xxxx)', status: 'معلق' }
-    ];
 
     let isAdminLoggedIn = false;
-    let hasMediaAccess = false;
+    let currentCustomer = null;
     let deferredPrompt;
 
-    // PWA Service Worker Registration & Installation Prompt
+    // PWA Service Worker
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -419,9 +494,6 @@
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then((choiceResult) => {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User accepted PWA install');
-          }
           deferredPrompt = null;
           document.getElementById('pwaBanner').classList.add('hidden');
         });
@@ -431,9 +503,11 @@
     // Initialize Page
     document.addEventListener('DOMContentLoaded', () => {
       renderProducts();
+      renderBanners();
       renderOrders();
       renderInventory();
-      renderMediaRequests();
+      renderCustomers();
+      renderAdminBanners();
     });
 
     // View Navigation
@@ -456,16 +530,11 @@
     }
 
     // Admin Auth
-    function openAdminModal() {
-      document.getElementById('adminLoginModal').classList.remove('hidden');
-    }
-    function closeAdminModal() {
-      document.getElementById('adminLoginModal').classList.add('hidden');
-    }
+    function openAdminModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
+    function closeAdminModal() { document.getElementById('adminLoginModal').classList.add('hidden'); }
     function loginAdmin() {
       const u = document.getElementById('adminUser').value.trim();
       const p = document.getElementById('adminPass').value.trim();
-      
       if ((u === 'ASA' || u === 'asa') && p === '199990') {
         isAdminLoggedIn = true;
         closeAdminModal();
@@ -480,7 +549,48 @@
       switchView('store');
     }
 
-    // Render Products Grid
+    // Customer Registration
+    function openCustomerAuthModal() { document.getElementById('customerAuthModal').classList.remove('hidden'); }
+    function closeCustomerAuthModal() { document.getElementById('customerAuthModal').classList.add('hidden'); }
+
+    function registerCustomer() {
+      const name = document.getElementById('custName').value.trim();
+      const mobile = document.getElementById('custMobile').value.trim();
+      const phone = document.getElementById('custPhone').value.trim();
+      const address = document.getElementById('custAddress').value.trim();
+
+      if (!name || !mobile || !address) {
+        alert('يرجى إدخال الاسم، رقم الجوال، والعنوان على الأقل.');
+        return;
+      }
+
+      currentCustomer = { name, mobile, phone, address, date: new Date().toISOString().split('T')[0] };
+      customers.push(currentCustomer);
+      renderCustomers();
+
+      document.getElementById('customerAuthLabel').innerText = name;
+      closeCustomerAuthModal();
+      alert(`مرحباً بك يا ${name}! تم تسجيل بياناتك بنجاح وأصبحت ظاهرة لدى الإدارة.`);
+    }
+
+    // Render Banners in Store
+    function renderBanners() {
+      const container = document.getElementById('bannersContainer');
+      container.innerHTML = '';
+      banners.forEach(b => {
+        container.innerHTML += `
+          <div class="dark-gradient rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col justify-between h-48 bg-cover bg-center" style="background-image: linear-gradient(rgba(74, 14, 23, 0.85), rgba(42, 8, 12, 0.9)), url('${b.image}');">
+            <div class="z-10">
+              <span class="bg-brand-gold/20 text-brand-gold text-xs px-3 py-1 rounded-full font-bold border border-brand-gold/30">كيو عطور وتجميل</span>
+              <h2 class="text-xl sm:text-2xl font-extrabold mt-2 text-brand-goldLight">${b.title}</h2>
+              <p class="text-xs text-slate-300 mt-1">${b.subtitle}</p>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // Render Products Grid (Fully Visible Images)
     function renderProducts(filterText = '') {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '';
@@ -488,18 +598,10 @@
       const filtered = products.filter(p => p.name.includes(filterText) || p.category.includes(filterText));
 
       filtered.forEach(p => {
-        const requiresAuth = p.mediaAccessRequired && !hasMediaAccess;
         grid.innerHTML += `
           <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
             <div class="relative">
-              <img src="${p.image}" class="w-full h-48 object-cover ${requiresAuth ? 'blur-md' : ''}">
-              ${requiresAuth ? `
-                <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-2 text-center">
-                  <i class="fa-solid fa-lock text-2xl mb-1 text-brand-gold"></i>
-                  <span class="text-xs font-bold">صلاحية الصور مطلوبة</span>
-                  <button onclick="toggleMediaAccessRequest()" class="mt-2 bg-brand-gold text-brand-dark px-2 py-1 rounded text-[10px] font-bold">اطلب الوصول</button>
-                </div>
-              ` : ''}
+              <img src="${p.image}" class="w-full h-48 object-cover">
               <span class="absolute top-2 right-2 bg-brand-dark/80 text-brand-gold text-[10px] font-bold px-2 py-0.5 rounded-full">${p.category}</span>
             </div>
             
@@ -573,9 +675,7 @@
       updateCartUI();
     }
 
-    function toggleCartModal() {
-      document.getElementById('cartModal').classList.toggle('hidden');
-    }
+    function toggleCartModal() { document.getElementById('cartModal').classList.toggle('hidden'); }
 
     function submitOrderToChat() {
       if (cart.length === 0) {
@@ -586,10 +686,11 @@
       const payMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       let orderItemsText = cart.map(c => `${c.name} (x${c.qty})`).join(', ');
       let total = cart.reduce((a, c) => a + (c.price * c.qty), 0);
+      const customerNameStr = currentCustomer ? currentCustomer.name : 'عميل غير مسجل';
       
       const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
-        customerName: 'عميل الشات',
+        customerName: customerNameStr,
         items: orderItemsText,
         total: total,
         payMethod: payMethod,
@@ -599,23 +700,17 @@
       orders.push(newOrder);
       renderOrders();
 
-      // Send to Chat
-      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**:\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}\n\n*يرجى تجهيز الطلب ك شحنة جديدة.*`;
+      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**\nالعميل: ${customerNameStr}\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}\n\n*يرجى تجهيز الطلب.*`;
       appendChatMessage('العميل', chatMsg, 'user');
 
       cart = [];
       updateCartUI();
       toggleCartModal();
-      openChatWindow();
+      toggleChatWindow();
     }
 
     // Chat Functions
-    function toggleChatWindow() {
-      document.getElementById('chatWindow').classList.toggle('hidden');
-    }
-    function openChatWindow() {
-      document.getElementById('chatWindow').classList.remove('hidden');
-    }
+    function toggleChatWindow() { document.getElementById('chatWindow').classList.toggle('hidden'); }
 
     function sendChatMessage() {
       const input = document.getElementById('chatInput');
@@ -624,9 +719,8 @@
       appendChatMessage('العميل', text, 'user');
       input.value = '';
 
-      // Auto Reply simulation from Admin
       setTimeout(() => {
-        appendChatMessage('الإدارة', 'تم استلام رسالتك/طلبك وجاري المتابعة والتجهيز فوراً.', 'admin');
+        appendChatMessage('الإدارة', 'تم استلام رسالتك وجاري تجهيز طلبك بواسطة فريق كيو عطور.', 'admin');
       }, 1000);
     }
 
@@ -645,27 +739,14 @@
     function handleChatFileUpload(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
-        const isVideo = file.type.startsWith('video');
         const fileUrl = URL.createObjectURL(file);
-        
-        let mediaHtml = isVideo 
-          ? `<video src="${fileUrl}" controls class="max-w-full rounded mt-1"></video>`
-          : `<img src="${fileUrl}" onclick="showMediaPreview('${fileUrl}', 'image')" class="max-w-full h-32 object-cover rounded mt-1 cursor-pointer">`;
-
-        appendChatMessage('العميل', `مرفق ملف (${file.name}):<br>${mediaHtml}`, 'user');
+        appendChatMessage('العميل', `مرفق ملف (${file.name}):<br><img src="${fileUrl}" class="max-w-full h-32 object-cover rounded mt-1">`, 'user');
       }
-    }
-
-    // Media Access Request
-    function toggleMediaAccessRequest() {
-      alert('تم إرسال طلب اعتماد الوصول للصور والمقاطع للإدارة. ستصلك الموافقة في الشات.');
-      mediaRequests.push({ id: Date.now(), name: 'عميل جاري المراجعة', status: 'معلق' });
-      renderMediaRequests();
     }
 
     // Admin Tabs & Management
     function switchAdminTab(tab) {
-      ['Orders', 'Inventory', 'Permissions'].forEach(t => {
+      ['Orders', 'Inventory', 'Customers', 'Banners'].forEach(t => {
         document.getElementById('tab' + t).classList.add('hidden');
         document.getElementById('tabBtn' + t).classList.remove('border-brand-burgundy', 'text-brand-burgundy');
         document.getElementById('tabBtn' + t).classList.add('border-transparent', 'text-slate-500');
@@ -689,16 +770,13 @@
             <td class="p-3">${o.customerName}</td>
             <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs">${o.payMethod}</span></td>
             <td class="p-3 font-bold">${o.total} جنيه</td>
-            <td class="p-3">
-              <span class="px-2 py-0.5 rounded text-xs font-bold ${o.status === 'جديد' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${o.status}</span>
-            </td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${o.status === 'جديد' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${o.status}</span></td>
             <td class="p-3">
               <button onclick="updateOrderStatus(${index})" class="bg-slate-800 text-white text-xs px-2 py-1 rounded hover:bg-slate-700">تحديث الحالة</button>
             </td>
           </tr>
         `;
       });
-
       document.getElementById('pendingBadge').innerText = pendingCount;
     }
 
@@ -715,7 +793,7 @@
       products.forEach((p, idx) => {
         tbody.innerHTML += `
           <tr class="border-b hover:bg-slate-50">
-            <td class="p-3"><img src="${p.image}" class="w-10 h-10 rounded object-cover"></td>
+            <td class="p-3"><img src="${p.image}" class="w-12 h-12 rounded object-cover shadow"></td>
             <td class="p-3 font-bold">${p.name}</td>
             <td class="p-3">${p.category}</td>
             <td class="p-3">${p.price} جنيه</td>
@@ -746,50 +824,71 @@
 
       if (!name || isNaN(price)) { alert('يرجى كتابة الاسم والسعر الصحيح'); return; }
 
-      products.push({ id: Date.now(), name, category: cat, price, stock, mediaAccessRequired: false, image: img });
+      products.push({ id: Date.now(), name, category: cat, price, stock, image: img });
       renderInventory();
       renderProducts();
       closeAddProductModal();
     }
 
-    function renderMediaRequests() {
-      const container = document.getElementById('mediaRequestsList');
+    function renderCustomers() {
+      const tbody = document.getElementById('adminCustomersTable');
+      tbody.innerHTML = '';
+      customers.forEach(c => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-3 font-bold text-slate-800">${c.name}</td>
+            <td class="p-3">${c.mobile}</td>
+            <td class="p-3">${c.phone || 'غير مسجل'}</td>
+            <td class="p-3">${c.address}</td>
+            <td class="p-3 text-xs text-slate-500">${c.date}</td>
+          </tr>
+        `;
+      });
+      document.getElementById('customerBadge').innerText = customers.length;
+    }
+
+    // Banners Management
+    function renderAdminBanners() {
+      const container = document.getElementById('adminBannersList');
       container.innerHTML = '';
-      mediaRequests.forEach((r, idx) => {
+      banners.forEach((b, idx) => {
         container.innerHTML += `
-          <div class="flex items-center justify-between border p-3 rounded-lg bg-slate-50">
-            <div>
-              <h4 class="font-bold text-xs">${r.name}</h4>
-              <p class="text-[10px] text-slate-500">الحالة الحالية: ${r.status}</p>
+          <div class="border rounded-xl p-3 bg-white flex items-center justify-between gap-3 shadow-sm">
+            <img src="${b.image}" class="w-20 h-16 object-cover rounded">
+            <div class="flex-1">
+              <h4 class="font-bold text-xs text-slate-800">${b.title}</h4>
+              <p class="text-[10px] text-slate-500">${b.subtitle}</p>
             </div>
-            <div class="flex gap-2">
-              <button onclick="approveMedia(${idx})" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold">قبول واعتماد الصلاحية</button>
-            </div>
+            <button onclick="deleteBanner(${idx})" class="text-rose-600 hover:text-rose-800 text-xs font-bold px-2 py-1"><i class="fa-solid fa-trash"></i></button>
           </div>
         `;
       });
     }
 
-    function approveMedia(idx) {
-      mediaRequests[idx].status = 'معتمد';
-      hasMediaAccess = true;
-      renderMediaRequests();
-      renderProducts();
-      alert('تم منح العميل صلاحية رؤية ألبوم الصور والفيديوهات للسلع المخفية!');
+    function openAddBannerModal() { document.getElementById('addBannerModal').classList.remove('hidden'); }
+    function closeAddBannerModal() { document.getElementById('addBannerModal').classList.add('hidden'); }
+
+    function saveNewBanner() {
+      const title = document.getElementById('bannerTitle').value;
+      const subtitle = document.getElementById('bannerSubtitle').value;
+      const img = document.getElementById('bannerImg').value || 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80';
+
+      if (!title) { alert('يرجى كتابة عنوان البنر'); return; }
+
+      banners.push({ id: Date.now(), title, subtitle, image: img });
+      renderBanners();
+      renderAdminBanners();
+      closeAddBannerModal();
     }
 
-    // Media Modal Preview
-    function showMediaPreview(url, type) {
-      const container = document.getElementById('mediaModalContent');
-      container.innerHTML = type === 'video' 
-        ? `<video src="${url}" controls class="max-h-[80vh] max-w-full rounded"></video>`
-        : `<img src="${url}" class="max-h-[80vh] max-w-full object-contain rounded">`;
-      document.getElementById('mediaModal').classList.remove('hidden');
+    function deleteBanner(idx) {
+      banners.splice(idx, 1);
+      renderBanners();
+      renderAdminBanners();
     }
-    function closeMediaModal() { document.getElementById('mediaModal').classList.add('hidden'); }
   </script>
 
-  <!-- Service Worker registration script for Desktop PWA -->
+  <!-- PWA Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
