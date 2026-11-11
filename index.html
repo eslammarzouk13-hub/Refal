@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>كيو عطور وتجميل - Q Perfumes</title>
+  
+  <!-- PWA Manifest Header Data -->
+  <meta name="theme-color" content="#4a0e17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="كيو عطور">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              dark: '#2A080C',
+              burgundy: '#4A0E17',
+              gold: '#D4AF37',
+              goldLight: '#F3E5AB',
+              accent: '#8B0000',
+              bgLight: '#FAF8F5'
+            }
+          },
+          fontFamily: {
+            sans: ['Tajawal', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Tajawal', sans-serif; background-color: #FAF8F5; }
+    .gold-gradient { background: linear-gradient(135deg, #D4AF37 0%, #F3E5AB 50%, #AA7C11 100%); }
+    .dark-gradient { background: linear-gradient(135deg, #4A0E17 0%, #2A080C 100%); }
+    .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+  </style>
+</head>
+<body class="bg-brand-bgLight min-h-screen text-slate-800 flex flex-col justify-between">
+
+  <!-- Header -->
+  <header class="dark-gradient text-white sticky top-0 z-40 shadow-xl border-b border-brand-gold/30">
+    <!-- PWA Install Banner -->
+    <div id="pwaBanner" class="hidden bg-brand-gold text-brand-dark px-4 py-2 flex items-center justify-between text-xs sm:text-sm font-bold shadow-inner">
+      <div class="flex items-center gap-2">
+        <i class="fa-solid fa-desktop text-base"></i>
+        <span>يمكنك تثبيت تطبيق "كيو عطور" كبرنامج مستقل على سطح المكتب!</span>
+      </div>
+      <button onclick="installPWA()" class="bg-brand-dark text-brand-gold px-3 py-1 rounded-full shadow hover:opacity-90">
+        تثبيت الآن <i class="fa-solid fa-download mr-1"></i>
+      </button>
+    </div>
+
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full gold-gradient flex items-center justify-center text-brand-dark font-black text-xl shadow">Q</div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide text-brand-gold">كيو عطور وتجميل</h1>
+          <p class="text-xs text-slate-300">Q Perfumes & Cosmetics</p>
+        </div>
+      </div>
+
+      <!-- Navigation & View Switcher -->
+      <div class="flex items-center gap-2 sm:gap-4">
+        <button onclick="switchView('store')" id="btnViewStore" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-gold text-brand-dark flex items-center gap-2 transition shadow">
+          <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">متجر المشتريات</span>
+        </button>
+        <button onclick="openAdminModal()" id="btnViewAdmin" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-slate-300 hover:text-white flex items-center gap-2 border border-brand-gold/40 transition">
+          <i class="fa-solid fa-lock text-brand-gold"></i> <span class="hidden sm:inline">لوحة الإدارة</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+    <!-- CUSTOMER STORE VIEW -->
+    <section id="storeView" class="space-y-6">
+      
+      <!-- Top Actions Bar -->
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <div class="relative w-full sm:w-64">
+            <input type="text" id="searchInput" oninput="filterProducts()" placeholder="ابحث عن عطر أو منتج..." class="w-full pr-9 pl-3 py-2 text-sm rounded-lg border border-slate-300 focus:outline-none focus:border-brand-burgundy">
+            <i class="fa-solid fa-magnifying-glass absolute right-3 top-2.5 text-slate-400"></i>
+          </div>
+        </div>
+        
+        <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+          <button onclick="toggleMediaAccessRequest()" class="bg-amber-50 text-amber-800 border border-amber-300 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-amber-100">
+            <i class="fa-solid fa-photo-film text-amber-600"></i> طلب صلاحية رؤية الصور والفيديو
+          </button>
+          
+          <button onclick="toggleCartModal()" class="relative bg-brand-burgundy text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-brand-dark shadow">
+            <i class="fa-solid fa-cart-shopping"></i> السلة
+            <span id="cartCount" class="bg-brand-gold text-brand-dark rounded-full text-xs w-5 h-5 flex items-center justify-center font-bold">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Banner -->
+      <div class="dark-gradient rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="z-10">
+          <span class="bg-brand-gold/20 text-brand-gold text-xs px-3 py-1 rounded-full font-bold border border-brand-gold/30">تشكيلة حصرية 2026</span>
+          <h2 class="text-2xl sm:text-3xl font-extrabold mt-2 text-brand-goldLight">أفخم العطور وأدوات التجميل</h2>
+          <p class="text-sm text-slate-300 mt-1">تصفح المنتجات وأرسل طلبيتك مباشرة عبر الشات الفوري للتجهيز.</p>
+        </div>
+        <i class="fa-solid fa-gem text-6xl text-brand-gold/20 absolute left-4 bottom-2 z-0"></i>
+      </div>
+
+      <!-- Product Grid -->
+      <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <!-- Dynamic Products -->
+      </div>
+    </section>
+
+    <!-- ADMIN DASHBOARD VIEW (PROTECTED) -->
+    <section id="adminView" class="hidden space-y-6">
+      <!-- Admin Top Status Bar -->
+      <div class="bg-slate-900 text-white p-4 rounded-xl flex justify-between items-center shadow border-r-4 border-brand-gold">
+        <div class="flex items-center gap-3">
+          <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
+          <div>
+            <h2 class="font-bold text-base text-brand-gold">لوحة الإدارة المباشرة (مسجل دخول: ASA)</h2>
+            <p class="text-xs text-slate-400">متابعة المستودع، الطلبات، والشات مع العملاء</p>
+          </div>
+        </div>
+        <button onclick="logoutAdmin()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition">
+          <i class="fa-solid fa-right-from-bracket ml-1"></i> خروج الإدارة
+        </button>
+      </div>
+
+      <!-- Admin Tabs -->
+      <div class="flex border-b border-slate-200 bg-white rounded-t-xl px-4 gap-4">
+        <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="py-3 px-4 text-sm font-bold border-b-2 border-brand-burgundy text-brand-burgundy flex items-center gap-2">
+          <i class="fa-solid fa-boxes-packing"></i> طلبات الشحنات <span id="pendingBadge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+        </button>
+        <button onclick="switchAdminTab('inventory')" id="tabBtnInventory" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-warehouse"></i> حركة المستودع والمنتجات
+        </button>
+        <button onclick="switchAdminTab('permissions')" id="tabBtnPermissions" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-user-shield"></i> صلاحيات الوصول للوسائط
+        </button>
+      </div>
+
+      <!-- TAB 1: Orders -->
+      <div id="tabOrders" class="space-y-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-list-check text-brand-burgundy"></i> إدارة الطلبات الواردة
+          </h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm text-right text-slate-600">
+              <thead class="bg-slate-100 text-slate-800 font-bold border-b">
+                <tr>
+                  <th class="p-3">رقم الطلب</th>
+                  <th class="p-3">اسم العميل</th>
+                  <th class="p-3">طريقة الدفع</th>
+                  <th class="p-3">المبلغ Total</th>
+                  <th class="p-3">الحالة</th>
+                  <th class="p-3">إجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="adminOrdersTable">
+                <!-- Dynamic Orders -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Inventory -->
+      <div id="tabInventory" class="hidden space-y-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
+          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-boxes-stacked text-brand-burgundy"></i> قائمة المخزون الحالي</h3>
+          <button onclick="openAddProductModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">
+            <i class="fa-solid fa-plus ml-1"></i> إضافة منتج جديد
+          </button>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+          <table class="w-full text-sm text-right">
+            <thead class="bg-slate-100 font-bold border-b text-slate-700">
+              <tr>
+                <th class="p-3">الصورة</th>
+                <th class="p-3">الاسم</th>
+                <th class="p-3">الفئة</th>
+                <th class="p-3">السعر</th>
+                <th class="p-3">الكمية بالمستودع</th>
+                <th class="p-3">إجراء</th>
+              </tr>
+            </thead>
+            <tbody id="adminInventoryTable">
+              <!-- Inventory Items -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 3: Permissions -->
+      <div id="tabPermissions" class="hidden space-y-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+          <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-users-gear text-brand-burgundy"></i> طلبات إتاحة مشاهدة ألبوم الصور والفيديو للعملاء</h3>
+          <p class="text-xs text-slate-500 mb-4">العملاء الذين طلبوا الوصول لمكتبة الوسائط الخاصة بعطور وتجميل كيو.</p>
+          <div id="mediaRequestsList" class="space-y-3">
+            <!-- Dynamic Media Requests -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- CHAT WIDGET (FLOATING) -->
+  <div id="chatWidget" class="fixed bottom-4 left-4 z-50">
+    <!-- Chat Button -->
+    <button onclick="toggleChatWindow()" class="gold-gradient text-brand-dark font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition transform">
+      <i class="fa-solid fa-comments text-xl"></i>
+      <span class="hidden sm:inline">شات الإدارة المباشرة</span>
+      <span id="unreadChatBadge" class="hidden bg-rose-600 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">1</span>
+    </button>
+
+    <!-- Chat Window Modal -->
+    <div id="chatWindow" class="hidden fixed bottom-20 left-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col h-[450px] overflow-hidden z-50">
+      <div class="dark-gradient p-3 text-white flex justify-between items-center">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-headset text-brand-gold"></i>
+          <div>
+            <h4 class="font-bold text-sm text-brand-gold">شات الإدارة - كيو عطور</h4>
+            <p class="text-[10px] text-emerald-400">متصل الآن لتلقي طلبك</p>
+          </div>
+        </div>
+        <button onclick="toggleChatWindow()" class="text-slate-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <!-- Chat Body -->
+      <div id="chatBody" class="flex-1 p-3 overflow-y-auto space-y-3 text-xs bg-slate-50">
+        <div class="bg-slate-200 text-slate-800 p-2.5 rounded-xl rounded-tr-none max-w-[85%]">
+          مرحباً بك في شركة **كيو عطور وتجميل**! 🌸 
+          يمكنك إرسال طلبك هنا مباشرة أو إرفاق الصور لتجهيز شحنتك فوراً.
+        </div>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="p-2 border-t bg-white flex items-center gap-2">
+        <label class="cursor-pointer text-slate-400 hover:text-brand-burgundy px-1">
+          <i class="fa-solid fa-paperclip text-lg"></i>
+          <input type="file" id="chatFileInput" class="hidden" accept="image/*,video/*" onchange="handleChatFileUpload(this)">
+        </label>
+        <input type="text" id="chatInput" placeholder="اكتب رسالتك أو اطلب شحنتك..." class="flex-1 border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <button onclick="sendChatMessage()" class="bg-brand-burgundy text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark">
+          <i class="fa-solid fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN LOGIN MODAL -->
+  <div id="adminLoginModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl relative border-t-4 border-brand-gold">
+      <button onclick="closeAdminModal()" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-full gold-gradient mx-auto flex items-center justify-center text-brand-dark text-xl font-bold mb-2 shadow"><i class="fa-solid fa-user-shield"></i></div>
+        <h3 class="font-bold text-lg text-slate-800">تسجيل دخول لوحة الإدارة</h3>
+        <p class="text-xs text-slate-500">خاص بإدارة شركة كيو عطور وتجميل</p>
+      </div>
+
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">اسم المستخدم (User)</label>
+          <input type="text" id="adminUser" placeholder="أدخل اسم المستخدم" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-burgundy">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">كلمة المرور (Password)</label>
+          <input type="password" id="adminPass" placeholder="******" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-burgundy">
+        </div>
+        <div id="adminLoginError" class="hidden text-xs text-rose-600 font-bold text-center">بيانات الدخول غير صحيحة!</div>
+        <button onclick="loginAdmin()" class="w-full dark-gradient text-brand-gold py-2.5 rounded-lg font-bold text-sm shadow hover:opacity-95">
+          تسجيل الدخول <i class="fa-solid fa-lock-open mr-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOPPING CART MODAL -->
+  <div id="cartModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h3 class="font-bold text-lg text-slate-800"><i class="fa-solid fa-basket-shopping text-brand-burgundy"></i> سلة الشراء</h3>
+        <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      
+      <!-- Cart Items list -->
+      <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
+        <!-- Cart Items Dynamic -->
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div class="border-t pt-3 mb-4 space-y-2">
+        <label class="block text-xs font-bold text-slate-700">اختر طريقة الدفع المطلوبة:</label>
+        <div class="grid grid-cols-2 gap-2">
+          <label class="border rounded-lg p-2 flex items-center gap-2 cursor-pointer hover:bg-slate-50 text-xs">
+            <input type="radio" name="paymentMethod" value="فودافون كاش (Vodafone Cash)" checked class="text-brand-burgundy">
+            <i class="fa-solid fa-mobile-screen text-rose-600"></i> فودافون كاش
+          </label>
+          <label class="border rounded-lg p-2 flex items-center gap-2 cursor-pointer hover:bg-slate-50 text-xs">
+            <input type="radio" name="paymentMethod" value="كاش نقدي عند الاستلام" class="text-brand-burgundy">
+            <i class="fa-solid fa-money-bill-wave text-emerald-600"></i> كاش نقدي
+          </label>
+        </div>
+      </div>
+
+      <!-- Total & Checkout -->
+      <div class="border-t pt-3 space-y-3">
+        <div class="flex justify-between font-extrabold text-base text-slate-800">
+          <span>المجموع الإجمالي:</span>
+          <span id="cartTotalAmount" class="text-brand-burgundy">0 جنيه</span>
+        </div>
+        <button onclick="submitOrderToChat()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-lg text-sm shadow flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> إرسال الطلب لشات الإدارة لتجهيزه
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD PRODUCT MODAL (ADMIN) -->
+  <div id="addProductModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex justify-between items-center border-b pb-3 mb-4">
+        <h3 class="font-bold text-slate-800">إضافة صنف جديد للمستودع</h3>
+        <button onclick="closeAddProductModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="font-bold block mb-1">اسم المنتج</label>
+          <input type="text" id="newProdName" class="w-full border p-2 rounded-lg">
+        </div>
+        <div>
+          <label class="font-bold block mb-1">الفئة</label>
+          <select id="newProdCat" class="w-full border p-2 rounded-lg">
+            <option value="عطور رجالية">عطور رجالية</option>
+            <option value="عطور نسائية">عطور نسائية</option>
+            <option value="تجميل وعناية">تجميل وعناية</option>
+          </select>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="font-bold block mb-1">السعر (جنيه)</label>
+            <input type="number" id="newProdPrice" class="w-full border p-2 rounded-lg">
+          </div>
+          <div>
+            <label class="font-bold block mb-1">الكمية بالمستودع</label>
+            <input type="number" id="newProdStock" class="w-full border p-2 rounded-lg" value="10">
+          </div>
+        </div>
+        <div>
+          <label class="font-bold block mb-1">رابط الصورة (URL)</label>
+          <input type="text" id="newProdImg" placeholder="https://..." class="w-full border p-2 rounded-lg">
+        </div>
+        <button onclick="saveNewProduct()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ المنتج في المستودع</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEDIA PREVIEW MODAL -->
+  <div id="mediaModal" class="hidden fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4">
+    <div class="max-w-2xl w-full bg-white rounded-2xl overflow-hidden relative">
+      <button onclick="closeMediaModal()" class="absolute top-3 right-3 bg-black/60 text-white w-8 h-8 rounded-full z-10"><i class="fa-solid fa-xmark"></i></button>
+      <div id="mediaModalContent" class="p-2 flex items-center justify-center bg-black min-h-[300px]">
+        <!-- Image/Video Dynamic -->
+      </div>
+    </div>
+  </div>
+
+  <footer class="bg-slate-900 text-slate-400 text-xs py-4 text-center border-t border-slate-800">
+    <p>جميع الحقوق محفوظة © 2026 - **شركة كيو عطور وتجميل**</p>
+  </footer>
+
+  <!-- APPLICATION LOGIC SCRIPT -->
+  <script>
+    // System Initial Data
+    let products = [
+      { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, mediaAccessRequired: false, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80" },
+      { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, mediaAccessRequired: true, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80" },
+      { id: 3, name: "مجموعة العناية والتجميل المتكاملة", category: "تجميل وعناية", price: 1450, stock: 8, mediaAccessRequired: true, image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" },
+      { id: 4, name: "عطر العود والمسك الخاص", category: "عطور رجالية", price: 1800, stock: 10, mediaAccessRequired: false, image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500&q=80" }
+    ];
+
+    let cart = [];
+    let orders = [
+      { id: 'ORD-8921', customerName: 'أحمد محمود', items: 'عطر كيو الملكي x1', total: 1200, payMethod: 'فودافون كاش (Vodafone Cash)', status: 'جديد' }
+    ];
+    let mediaRequests = [
+      { id: 101, name: 'عميل جديد (010xxxx)', status: 'معلق' }
+    ];
+
+    let isAdminLoggedIn = false;
+    let hasMediaAccess = false;
+    let deferredPrompt;
+
+    // PWA Service Worker Registration & Installation Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwaBanner').classList.remove('hidden');
+    });
+
+    function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted PWA install');
+          }
+          deferredPrompt = null;
+          document.getElementById('pwaBanner').classList.add('hidden');
+        });
+      }
+    }
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      renderProducts();
+      renderOrders();
+      renderInventory();
+      renderMediaRequests();
+    });
+
+    // View Navigation
+    function switchView(view) {
+      if (view === 'admin') {
+        if (!isAdminLoggedIn) {
+          openAdminModal();
+          return;
+        }
+        document.getElementById('storeView').classList.add('hidden');
+        document.getElementById('adminView').classList.remove('hidden');
+        document.getElementById('btnViewAdmin').classList.add('bg-brand-gold', 'text-brand-dark');
+        document.getElementById('btnViewStore').classList.remove('bg-brand-gold', 'text-brand-dark');
+      } else {
+        document.getElementById('adminView').classList.add('hidden');
+        document.getElementById('storeView').classList.remove('hidden');
+        document.getElementById('btnViewStore').classList.add('bg-brand-gold', 'text-brand-dark');
+        document.getElementById('btnViewAdmin').classList.remove('bg-brand-gold', 'text-brand-dark');
+      }
+    }
+
+    // Admin Auth
+    function openAdminModal() {
+      document.getElementById('adminLoginModal').classList.remove('hidden');
+    }
+    function closeAdminModal() {
+      document.getElementById('adminLoginModal').classList.add('hidden');
+    }
+    function loginAdmin() {
+      const u = document.getElementById('adminUser').value.trim();
+      const p = document.getElementById('adminPass').value.trim();
+      
+      if ((u === 'ASA' || u === 'asa') && p === '199990') {
+        isAdminLoggedIn = true;
+        closeAdminModal();
+        document.getElementById('adminLoginError').classList.add('hidden');
+        switchView('admin');
+      } else {
+        document.getElementById('adminLoginError').classList.remove('hidden');
+      }
+    }
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      switchView('store');
+    }
+
+    // Render Products Grid
+    function renderProducts(filterText = '') {
+      const grid = document.getElementById('productGrid');
+      grid.innerHTML = '';
+
+      const filtered = products.filter(p => p.name.includes(filterText) || p.category.includes(filterText));
+
+      filtered.forEach(p => {
+        const requiresAuth = p.mediaAccessRequired && !hasMediaAccess;
+        grid.innerHTML += `
+          <div class="bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+            <div class="relative">
+              <img src="${p.image}" class="w-full h-48 object-cover ${requiresAuth ? 'blur-md' : ''}">
+              ${requiresAuth ? `
+                <div class="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-2 text-center">
+                  <i class="fa-solid fa-lock text-2xl mb-1 text-brand-gold"></i>
+                  <span class="text-xs font-bold">صلاحية الصور مطلوبة</span>
+                  <button onclick="toggleMediaAccessRequest()" class="mt-2 bg-brand-gold text-brand-dark px-2 py-1 rounded text-[10px] font-bold">اطلب الوصول</button>
+                </div>
+              ` : ''}
+              <span class="absolute top-2 right-2 bg-brand-dark/80 text-brand-gold text-[10px] font-bold px-2 py-0.5 rounded-full">${p.category}</span>
+            </div>
+            
+            <div class="p-4 flex-1 flex flex-col justify-between">
+              <div>
+                <h3 class="font-bold text-slate-800 text-sm mb-1">${p.name}</h3>
+                <p class="text-xs text-slate-500 mb-2">المخزون المتوفر: ${p.stock} قطعة</p>
+              </div>
+              
+              <div class="flex items-center justify-between mt-3 pt-2 border-t">
+                <span class="font-extrabold text-brand-burgundy text-base">${p.price} جنيه</span>
+                <button onclick="addToCart(${p.id})" class="bg-brand-burgundy text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-brand-dark flex items-center gap-1">
+                  <i class="fa-solid fa-plus"></i> إضافـة
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function filterProducts() {
+      const query = document.getElementById('searchInput').value.trim();
+      renderProducts(query);
+    }
+
+    // Cart Management
+    function addToCart(productId) {
+      const prod = products.find(p => p.id === productId);
+      const existing = cart.find(c => c.id === productId);
+      if (existing) {
+        existing.qty++;
+      } else {
+        cart.push({ ...prod, qty: 1 });
+      }
+      updateCartUI();
+    }
+
+    function updateCartUI() {
+      const count = cart.reduce((acc, i) => acc + i.qty, 0);
+      document.getElementById('cartCount').innerText = count;
+
+      const list = document.getElementById('cartItemsList');
+      list.innerHTML = '';
+      let total = 0;
+
+      cart.forEach((item, index) => {
+        const itemTotal = item.price * item.qty;
+        total += itemTotal;
+        list.innerHTML += `
+          <div class="flex items-center justify-between border-b pb-2">
+            <div>
+              <h4 class="font-bold text-xs text-slate-800">${item.name}</h4>
+              <p class="text-[10px] text-slate-500">${item.price} × ${item.qty} = ${itemTotal} جنيه</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="changeQty(${index}, -1)" class="w-5 h-5 bg-slate-200 rounded font-bold text-xs">-</button>
+              <span class="text-xs font-bold">${item.qty}</span>
+              <button onclick="changeQty(${index}, 1)" class="w-5 h-5 bg-slate-200 rounded font-bold text-xs">+</button>
+            </div>
+          </div>
+        `;
+      });
+
+      document.getElementById('cartTotalAmount').innerText = `${total} جنيه`;
+    }
+
+    function changeQty(index, delta) {
+      cart[index].qty += delta;
+      if (cart[index].qty <= 0) cart.splice(index, 1);
+      updateCartUI();
+    }
+
+    function toggleCartModal() {
+      document.getElementById('cartModal').classList.toggle('hidden');
+    }
+
+    function submitOrderToChat() {
+      if (cart.length === 0) {
+        alert('السلة فارغة!');
+        return;
+      }
+      
+      const payMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+      let orderItemsText = cart.map(c => `${c.name} (x${c.qty})`).join(', ');
+      let total = cart.reduce((a, c) => a + (c.price * c.qty), 0);
+      
+      const newOrder = {
+        id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
+        customerName: 'عميل الشات',
+        items: orderItemsText,
+        total: total,
+        payMethod: payMethod,
+        status: 'جديد'
+      };
+
+      orders.push(newOrder);
+      renderOrders();
+
+      // Send to Chat
+      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**:\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}\n\n*يرجى تجهيز الطلب ك شحنة جديدة.*`;
+      appendChatMessage('العميل', chatMsg, 'user');
+
+      cart = [];
+      updateCartUI();
+      toggleCartModal();
+      openChatWindow();
+    }
+
+    // Chat Functions
+    function toggleChatWindow() {
+      document.getElementById('chatWindow').classList.toggle('hidden');
+    }
+    function openChatWindow() {
+      document.getElementById('chatWindow').classList.remove('hidden');
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      appendChatMessage('العميل', text, 'user');
+      input.value = '';
+
+      // Auto Reply simulation from Admin
+      setTimeout(() => {
+        appendChatMessage('الإدارة', 'تم استلام رسالتك/طلبك وجاري المتابعة والتجهيز فوراً.', 'admin');
+      }, 1000);
+    }
+
+    function appendChatMessage(sender, text, type) {
+      const body = document.getElementById('chatBody');
+      const isUser = type === 'user';
+      body.innerHTML += `
+        <div class="${isUser ? 'bg-brand-burgundy text-white rounded-tl-none mr-auto' : 'bg-slate-200 text-slate-800 rounded-tr-none ml-auto'} p-2.5 rounded-xl max-w-[85%]">
+          <div class="font-bold text-[10px] opacity-75 mb-0.5">${sender}</div>
+          <div>${text.replace(/\n/g, '<br>')}</div>
+        </div>
+      `;
+      body.scrollTop = body.scrollHeight;
+    }
+
+    function handleChatFileUpload(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        const isVideo = file.type.startsWith('video');
+        const fileUrl = URL.createObjectURL(file);
+        
+        let mediaHtml = isVideo 
+          ? `<video src="${fileUrl}" controls class="max-w-full rounded mt-1"></video>`
+          : `<img src="${fileUrl}" onclick="showMediaPreview('${fileUrl}', 'image')" class="max-w-full h-32 object-cover rounded mt-1 cursor-pointer">`;
+
+        appendChatMessage('العميل', `مرفق ملف (${file.name}):<br>${mediaHtml}`, 'user');
+      }
+    }
+
+    // Media Access Request
+    function toggleMediaAccessRequest() {
+      alert('تم إرسال طلب اعتماد الوصول للصور والمقاطع للإدارة. ستصلك الموافقة في الشات.');
+      mediaRequests.push({ id: Date.now(), name: 'عميل جاري المراجعة', status: 'معلق' });
+      renderMediaRequests();
+    }
+
+    // Admin Tabs & Management
+    function switchAdminTab(tab) {
+      ['Orders', 'Inventory', 'Permissions'].forEach(t => {
+        document.getElementById('tab' + t).classList.add('hidden');
+        document.getElementById('tabBtn' + t).classList.remove('border-brand-burgundy', 'text-brand-burgundy');
+        document.getElementById('tabBtn' + t).classList.add('border-transparent', 'text-slate-500');
+      });
+
+      const currentTab = tab.charAt(0).toUpperCase() + tab.slice(1);
+      document.getElementById('tab' + currentTab).classList.remove('hidden');
+      document.getElementById('tabBtn' + currentTab).classList.add('border-brand-burgundy', 'text-brand-burgundy');
+    }
+
+    function renderOrders() {
+      const tbody = document.getElementById('adminOrdersTable');
+      tbody.innerHTML = '';
+      let pendingCount = 0;
+
+      orders.forEach((o, index) => {
+        if (o.status === 'جديد') pendingCount++;
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-3 font-bold text-brand-burgundy">${o.id}</td>
+            <td class="p-3">${o.customerName}</td>
+            <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded text-xs">${o.payMethod}</span></td>
+            <td class="p-3 font-bold">${o.total} جنيه</td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-xs font-bold ${o.status === 'جديد' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${o.status}</span>
+            </td>
+            <td class="p-3">
+              <button onclick="updateOrderStatus(${index})" class="bg-slate-800 text-white text-xs px-2 py-1 rounded hover:bg-slate-700">تحديث الحالة</button>
+            </td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('pendingBadge').innerText = pendingCount;
+    }
+
+    function updateOrderStatus(index) {
+      const statuses = ['جديد', 'قيد التجهيز', 'تم الشحن', 'مكتمل'];
+      let current = statuses.indexOf(orders[index].status);
+      orders[index].status = statuses[(current + 1) % statuses.length];
+      renderOrders();
+    }
+
+    function renderInventory() {
+      const tbody = document.getElementById('adminInventoryTable');
+      tbody.innerHTML = '';
+      products.forEach((p, idx) => {
+        tbody.innerHTML += `
+          <tr class="border-b hover:bg-slate-50">
+            <td class="p-3"><img src="${p.image}" class="w-10 h-10 rounded object-cover"></td>
+            <td class="p-3 font-bold">${p.name}</td>
+            <td class="p-3">${p.category}</td>
+            <td class="p-3">${p.price} جنيه</td>
+            <td class="p-3">${p.stock}</td>
+            <td class="p-3">
+              <button onclick="deleteProduct(${idx})" class="text-rose-600 hover:text-rose-800 text-xs font-bold">حذف</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function deleteProduct(index) {
+      products.splice(index, 1);
+      renderInventory();
+      renderProducts();
+    }
+
+    function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
+    function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
+
+    function saveNewProduct() {
+      const name = document.getElementById('newProdName').value;
+      const cat = document.getElementById('newProdCat').value;
+      const price = parseFloat(document.getElementById('newProdPrice').value);
+      const stock = parseInt(document.getElementById('newProdStock').value);
+      const img = document.getElementById('newProdImg').value || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80';
+
+      if (!name || isNaN(price)) { alert('يرجى كتابة الاسم والسعر الصحيح'); return; }
+
+      products.push({ id: Date.now(), name, category: cat, price, stock, mediaAccessRequired: false, image: img });
+      renderInventory();
+      renderProducts();
+      closeAddProductModal();
+    }
+
+    function renderMediaRequests() {
+      const container = document.getElementById('mediaRequestsList');
+      container.innerHTML = '';
+      mediaRequests.forEach((r, idx) => {
+        container.innerHTML += `
+          <div class="flex items-center justify-between border p-3 rounded-lg bg-slate-50">
+            <div>
+              <h4 class="font-bold text-xs">${r.name}</h4>
+              <p class="text-[10px] text-slate-500">الحالة الحالية: ${r.status}</p>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="approveMedia(${idx})" class="bg-emerald-600 text-white text-xs px-3 py-1 rounded font-bold">قبول واعتماد الصلاحية</button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function approveMedia(idx) {
+      mediaRequests[idx].status = 'معتمد';
+      hasMediaAccess = true;
+      renderMediaRequests();
+      renderProducts();
+      alert('تم منح العميل صلاحية رؤية ألبوم الصور والفيديوهات للسلع المخفية!');
+    }
+
+    // Media Modal Preview
+    function showMediaPreview(url, type) {
+      const container = document.getElementById('mediaModalContent');
+      container.innerHTML = type === 'video' 
+        ? `<video src="${url}" controls class="max-h-[80vh] max-w-full rounded"></video>`
+        : `<img src="${url}" class="max-h-[80vh] max-w-full object-contain rounded">`;
+      document.getElementById('mediaModal').classList.remove('hidden');
+    }
+    function closeMediaModal() { document.getElementById('mediaModal').classList.add('hidden'); }
+  </script>
+
+  <!-- Service Worker registration script for Desktop PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          self.addEventListener('install', (e) => self.skipWaiting());
+          self.addEventListener('activate', (e) => self.clients.claim());
+          self.addEventListener('fetch', (e) => e.respondWith(fetch(e.request)));
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        const swUrl = URL.createObjectURL(blob);
+        navigator.serviceWorker.register(swUrl).catch(err => console.log('SW Reg Error:', err));
+      });
+    }
+  </script>
+</body>
+</html>
