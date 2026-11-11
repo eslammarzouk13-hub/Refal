@@ -79,8 +79,10 @@
         <button onclick="switchView('store')" id="btnViewStore" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-brand-gold text-brand-dark flex items-center gap-2 transition shadow">
           <i class="fa-solid fa-store"></i> <span class="hidden sm:inline">متجر المشتريات</span>
         </button>
-        <button onclick="openAdminModal()" id="btnViewAdmin" class="px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-slate-300 hover:text-white flex items-center gap-2 border border-brand-gold/40 transition">
+        <button onclick="openAdminModal()" id="btnViewAdmin" class="relative px-3 py-1.5 rounded-lg text-sm font-medium bg-slate-800 text-slate-300 hover:text-white flex items-center gap-2 border border-brand-gold/40 transition">
           <i class="fa-solid fa-lock text-brand-gold"></i> <span class="hidden sm:inline">لوحة الإدارة</span>
+          <!-- Admin Notification Badge -->
+          <span id="adminNotificationBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold animate-bounce">0</span>
         </button>
       </div>
     </div>
@@ -128,7 +130,7 @@
           <span class="w-3 h-3 rounded-full bg-emerald-500 animate-pulse"></span>
           <div>
             <h2 class="font-bold text-base text-brand-gold">لوحة الإدارة المباشرة (مسجل دخول: ASA)</h2>
-            <p class="text-xs text-slate-400">متابعة المستودع، الطلبات، العملاء، والبنرات الدعائية</p>
+            <p class="text-xs text-slate-400">متابعة المستودع، الشات الفوري للإدارة، والطلبات</p>
           </div>
         </div>
         <button onclick="logoutAdmin()" class="bg-rose-600/20 text-rose-300 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-rose-600 hover:text-white transition">
@@ -141,14 +143,17 @@
         <button onclick="switchAdminTab('orders')" id="tabBtnOrders" class="py-3 px-4 text-sm font-bold border-b-2 border-brand-burgundy text-brand-burgundy flex items-center gap-2">
           <i class="fa-solid fa-boxes-packing"></i> طلبات الشحنات <span id="pendingBadge" class="bg-rose-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
+        <button onclick="switchAdminTab('adminChat')" id="tabBtnAdminChat" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2 relative">
+          <i class="fa-solid fa-comments"></i> شات العملاء <span id="adminChatTabBadge" class="hidden bg-rose-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">0</span>
+        </button>
         <button onclick="switchAdminTab('inventory')" id="tabBtnInventory" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-warehouse"></i> حركة المستودع
+          <i class="fa-solid fa-warehouse"></i> المستودع والصور
         </button>
         <button onclick="switchAdminTab('customers')" id="tabBtnCustomers" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-users"></i> عملاء المتجر الجدد <span id="customerBadge" class="bg-brand-burgundy text-white text-xs px-2 py-0.5 rounded-full">0</span>
+          <i class="fa-solid fa-users"></i> العملاء الجدد <span id="customerBadge" class="bg-brand-burgundy text-white text-xs px-2 py-0.5 rounded-full">0</span>
         </button>
         <button onclick="switchAdminTab('banners')" id="tabBtnBanners" class="py-3 px-4 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-800 flex items-center gap-2">
-          <i class="fa-solid fa-image"></i> إدارة البنرات والعروض
+          <i class="fa-solid fa-image"></i> إدارة البنرات والصور
         </button>
       </div>
 
@@ -178,12 +183,32 @@
         </div>
       </div>
 
-      <!-- TAB 2: Inventory -->
+      <!-- TAB 2: Admin Live Chat Tab -->
+      <div id="tabAdminChat" class="hidden space-y-4">
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex flex-col h-[500px]">
+          <h3 class="font-bold text-slate-800 mb-2 flex items-center gap-2 border-b pb-2">
+            <i class="fa-solid fa-headset text-brand-burgundy"></i> مركز خدمة العملاء والشات المباشر (إشعارات فورية)
+          </h3>
+          <!-- Messages Box -->
+          <div id="adminLiveChatBody" class="flex-1 overflow-y-auto space-y-3 p-3 bg-slate-50 rounded-xl text-xs border">
+            <!-- Messages Display -->
+          </div>
+          <!-- Reply Input -->
+          <div class="mt-3 flex gap-2 pt-2 border-t">
+            <input type="text" id="adminReplyInput" placeholder="اكتب رد الإدارة للعميل..." class="flex-1 border rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendAdminReply()">
+            <button onclick="sendAdminReply()" class="bg-brand-burgundy text-white px-4 py-2 rounded-lg text-xs font-bold hover:bg-brand-dark">
+              <i class="fa-solid fa-paper-plane ml-1"></i> إرسال رد
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Inventory -->
       <div id="tabInventory" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
-          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-boxes-stacked text-brand-burgundy"></i> قائمة المخزون الحالي (جميع الصور ظاهرة 100%)</h3>
+          <h3 class="font-bold text-slate-800"><i class="fa-solid fa-boxes-stacked text-brand-burgundy"></i> قائمة المخزون واختيار الصور</h3>
           <button onclick="openAddProductModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">
-            <i class="fa-solid fa-plus ml-1"></i> إضافة صنف جديد
+            <i class="fa-solid fa-plus ml-1"></i> إضافة منتج جديد مع اختيار صورة
           </button>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
@@ -192,9 +217,9 @@
               <tr>
                 <th class="p-3">الصورة</th>
                 <th class="p-3">الاسم</th>
-                <th class="p-3">الفئة</th>
+                <th class="p-3">الفئة والوصف</th>
                 <th class="p-3">السعر</th>
-                <th class="p-3">الكمية بالمستودع</th>
+                <th class="p-3">الكمية</th>
                 <th class="p-3">إجراء</th>
               </tr>
             </thead>
@@ -205,11 +230,10 @@
         </div>
       </div>
 
-      <!-- TAB 3: Customers -->
+      <!-- TAB 4: Customers -->
       <div id="tabCustomers" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
           <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-address-book text-brand-burgundy"></i> قائمة العملاء المسجلين الجدد</h3>
-          <p class="text-xs text-slate-500 mb-4">تفاصيل العملاء الذين قاموا بالتسجيل في التطبيق (الاسم، الجوال، الهاتف، والعنوان).</p>
           <div class="overflow-x-auto">
             <table class="w-full text-sm text-right text-slate-600">
               <thead class="bg-slate-100 text-slate-800 font-bold border-b">
@@ -218,30 +242,30 @@
                   <th class="p-3">رقم الجوال</th>
                   <th class="p-3">رقم الهاتف</th>
                   <th class="p-3">العنوان</th>
-                  <th class="p-3">تاريخ التسجيل</th>
+                  <th class="p-3">التاريخ</th>
                 </tr>
               </thead>
               <tbody id="adminCustomersTable">
-                <!-- Dynamic Customers -->
+                <!-- Customers -->
               </tbody>
             </table>
           </div>
         </div>
       </div>
 
-      <!-- TAB 4: Banners Management -->
+      <!-- TAB 5: Banners Management -->
       <div id="tabBanners" class="hidden space-y-4">
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200 flex justify-between items-center">
           <div>
-            <h3 class="font-bold text-slate-800"><i class="fa-solid fa-images text-brand-burgundy"></i> إدارة البنرات والعروض الترويجية</h3>
-            <p class="text-xs text-slate-500">إضافة أو حذف البنرات التي تظهر في واجهة المتجر الرئيسية.</p>
+            <h3 class="font-bold text-slate-800"><i class="fa-solid fa-images text-brand-burgundy"></i> إدارة البنرات والصور الدعائية</h3>
+            <p class="text-xs text-slate-500">اختر صور البنرات من جهازك مباشرة.</p>
           </div>
           <button onclick="openAddBannerModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-700">
             <i class="fa-solid fa-plus ml-1"></i> إضافة بنر جديد
           </button>
         </div>
         <div id="adminBannersList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <!-- Dynamic Banners List -->
+          <!-- Banners -->
         </div>
       </div>
     </section>
@@ -250,9 +274,10 @@
 
   <!-- CHAT WIDGET (FLOATING) -->
   <div id="chatWidget" class="fixed bottom-4 left-4 z-50">
-    <button onclick="toggleChatWindow()" class="gold-gradient text-brand-dark font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition transform">
+    <button onclick="toggleChatWindow()" class="relative gold-gradient text-brand-dark font-bold p-4 rounded-full shadow-2xl flex items-center gap-2 hover:scale-105 transition transform">
       <i class="fa-solid fa-comments text-xl"></i>
       <span class="hidden sm:inline">شات الإدارة المباشرة</span>
+      <span id="clientChatBadge" class="hidden absolute -top-1 -right-1 bg-rose-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold">1</span>
     </button>
 
     <div id="chatWindow" class="hidden fixed bottom-20 left-4 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col h-[450px] overflow-hidden z-50">
@@ -270,7 +295,7 @@
       <div id="chatBody" class="flex-1 p-3 overflow-y-auto space-y-3 text-xs bg-slate-50">
         <div class="bg-slate-200 text-slate-800 p-2.5 rounded-xl rounded-tr-none max-w-[85%]">
           مرحباً بك في شركة **كيو عطور وتجميل**! 🌸 
-          يمكنك إرسال طلبك هنا مباشرة أو إرفاق الصور لتجهيز شحنتك فوراً.
+          تحدث معنا مباشرة أو أرسل استفسارك وسنرد عليك فوراً.
         </div>
       </div>
 
@@ -279,7 +304,7 @@
           <i class="fa-solid fa-paperclip text-lg"></i>
           <input type="file" id="chatFileInput" class="hidden" accept="image/*,video/*" onchange="handleChatFileUpload(this)">
         </label>
-        <input type="text" id="chatInput" placeholder="اكتب رسالتك أو اطلب شحنتك..." class="flex-1 border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendChatMessage()">
+        <input type="text" id="chatInput" placeholder="اكتب رسالتك أو طلبك..." class="flex-1 border rounded-lg px-3 py-1.5 text-xs focus:outline-none focus:border-brand-burgundy" onkeypress="if(event.key==='Enter') sendChatMessage()">
         <button onclick="sendChatMessage()" class="bg-brand-burgundy text-white px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-brand-dark">
           <i class="fa-solid fa-paper-plane"></i>
         </button>
@@ -321,7 +346,7 @@
       <div class="text-center mb-4">
         <div class="w-12 h-12 rounded-full bg-brand-burgundy mx-auto flex items-center justify-center text-white text-xl font-bold mb-2 shadow"><i class="fa-solid fa-user-plus"></i></div>
         <h3 class="font-bold text-lg text-slate-800">تسجيل عميل جديد</h3>
-        <p class="text-xs text-slate-500">أدخل بياناتك لتصل للإدارة ويتم حفظ حسابك</p>
+        <p class="text-xs text-slate-500">أدخل بياناتك لتصل للإدارة</p>
       </div>
 
       <div class="space-y-3 text-xs">
@@ -334,12 +359,12 @@
           <input type="text" id="custMobile" placeholder="05xxxxxxxx / 010xxxxxxxx" class="w-full border p-2 rounded-lg">
         </div>
         <div>
-          <label class="font-bold block mb-1">رقم الهاتف (الراضي / الأرضي / البديل)</label>
+          <label class="font-bold block mb-1">رقم الهاتف البديل</label>
           <input type="text" id="custPhone" placeholder="رقم الهاتف الإضافي" class="w-full border p-2 rounded-lg">
         </div>
         <div>
           <label class="font-bold block mb-1">العنوان بالتفصيل</label>
-          <textarea id="custAddress" placeholder="المدينة، الحي، الشارع، رقم الحلة..." class="w-full border p-2 rounded-lg h-16"></textarea>
+          <textarea id="custAddress" placeholder="المدينة، الحي، الشارع..." class="w-full border p-2 rounded-lg h-16"></textarea>
         </div>
         <button onclick="registerCustomer()" class="w-full bg-brand-burgundy text-white font-bold py-2.5 rounded-lg mt-2 text-sm shadow hover:bg-brand-dark">
           تأكيد التسجيل وإرسال البيانات للإدارة
@@ -356,9 +381,7 @@
         <button onclick="toggleCartModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
       </div>
       
-      <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 mb-4 pr-1">
-        <!-- Cart Items Dynamic -->
-      </div>
+      <div id="cartItemsList" class="flex-1 overflow-y-auto space-y-3 mb-4 pr-1"></div>
 
       <!-- Payment Method Selection -->
       <div class="border-t pt-3 mb-4 space-y-2">
@@ -387,11 +410,11 @@
     </div>
   </div>
 
-  <!-- ADD PRODUCT MODAL (ADMIN) -->
+  <!-- ADD PRODUCT MODAL (ADMIN - WITH DEVICE IMAGE SELECTOR) -->
   <div id="addProductModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center border-b pb-3 mb-4">
-        <h3 class="font-bold text-slate-800">إضافة صنف عطور أو تجميل جديد</h3>
+        <h3 class="font-bold text-slate-800">إضافة صنف جديد (مع اختيار صورة من الجهاز)</h3>
         <button onclick="closeAddProductModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs">
@@ -413,29 +436,33 @@
             <input type="number" id="newProdPrice" class="w-full border p-2 rounded-lg">
           </div>
           <div>
-            <label class="font-bold block mb-1">الكمية بالمستودع</label>
+            <label class="font-bold block mb-1">الكمية</label>
             <input type="number" id="newProdStock" class="w-full border p-2 rounded-lg" value="10">
           </div>
         </div>
         <div>
-          <label class="font-bold block mb-1">رابط الصورة (URL - ظاهرة تماماً للجميع)</label>
-          <input type="text" id="newProdImg" placeholder="https://..." class="w-full border p-2 rounded-lg">
+          <label class="font-bold block mb-1">اختر صورة المنتج من جهازك:</label>
+          <input type="file" id="newProdFileImg" accept="image/*" class="w-full border p-2 rounded-lg text-xs file:bg-brand-burgundy file:text-white file:border-0 file:rounded file:px-2 file:py-1">
         </div>
-        <button onclick="saveNewProduct()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ المنتج</button>
+        <div>
+          <label class="font-bold block mb-1">الوصف التفصيلي للمنتج</label>
+          <textarea id="newProdDesc" placeholder="المكونات، الثبات..." class="w-full border p-2 rounded-lg h-20"></textarea>
+        </div>
+        <button onclick="saveNewProduct()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ المنتج في المستودع</button>
       </div>
     </div>
   </div>
 
-  <!-- ADD BANNER MODAL (ADMIN) -->
+  <!-- ADD BANNER MODAL (ADMIN - WITH DEVICE IMAGE SELECTOR) -->
   <div id="addBannerModal" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex justify-between items-center border-b pb-3 mb-4">
-        <h3 class="font-bold text-slate-800">إضافة بنر / عرض جديد</h3>
+        <h3 class="font-bold text-slate-800">إضافة بنر جديد (اختيار صورة من الجهاز)</h3>
         <button onclick="closeAddBannerModal()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div class="space-y-3 text-xs">
         <div>
-          <label class="font-bold block mb-1">عنوان البنر (مثال: عروض صيف 2026)</label>
+          <label class="font-bold block mb-1">عنوان البنر</label>
           <input type="text" id="bannerTitle" class="w-full border p-2 rounded-lg">
         </div>
         <div>
@@ -443,8 +470,8 @@
           <input type="text" id="bannerSubtitle" class="w-full border p-2 rounded-lg">
         </div>
         <div>
-          <label class="font-bold block mb-1">رابط صورة البنر (URL)</label>
-          <input type="text" id="bannerImg" placeholder="https://..." class="w-full border p-2 rounded-lg">
+          <label class="font-bold block mb-1">اختر صورة البنر من جهازك:</label>
+          <input type="file" id="bannerFileImg" accept="image/*" class="w-full border p-2 rounded-lg text-xs file:bg-brand-burgundy file:text-white file:border-0 file:rounded file:px-2 file:py-1">
         </div>
         <button onclick="saveNewBanner()" class="w-full bg-brand-burgundy text-white font-bold py-2 rounded-lg mt-2">حفظ وعرض البنر</button>
       </div>
@@ -457,33 +484,35 @@
 
   <!-- APPLICATION LOGIC SCRIPT -->
   <script>
-    // Initial Data
+    // Shared Data Store
     let products = [
-      { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80" },
-      { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80" },
-      { id: 3, name: "مجموعة العناية والتجميل المتكاملة", category: "تجميل وعناية", price: 1450, stock: 8, image: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&q=80" },
-      { id: 4, name: "عطر العود والمسك الخاص", category: "عطور رجالية", price: 1800, stock: 10, image: "https://images.unsplash.com/photo-1523293182086-7651a899d37f?w=500&q=80" }
+      { id: 1, name: "عطر كيو الملكي (Q Royal)", category: "عطور رجالية", price: 1200, stock: 15, image: "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80", description: "عطر فاخر يجمع بين نفحات العود الملكي والمسك الأسود." },
+      { id: 2, name: "عطر الورد الذهبي (Gold Rose)", category: "عطور نسائية", price: 950, stock: 22, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=500&q=80", description: "مزيج ساحر من الورد الجوري والباستيل مع الفانيليا." }
     ];
 
     let banners = [
-      { id: 1, title: "أفخم العطور وأدوات التجميل", subtitle: "تصفح المنتجات وأرسل طلبيتك مباشرة عبر الشات الفوري.", image: "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80" },
-      { id: 2, title: "عروض خاصة وعصريّة 2026", subtitle: "تشكيلة مميزة من عطور كيو الحصرية.", image: "https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?w=500&q=80" }
+      { id: 1, title: "أفخم العطور وأدوات التجميل", subtitle: "تصفح المنتجات وأرسل طلبيتك مباشرة عبر الشات الفوري.", image: "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80" }
     ];
 
     let customers = [
-      { name: 'محمد عبد الله', mobile: '01012345678', phone: '02334455', address: 'القاهرة، شارع الهرم', date: '2026-11-11' }
+      { name: 'محمد عبد الله', mobile: '01012345678', phone: '02334455', address: 'القاهرة', date: '2026-11-11' }
     ];
 
     let cart = [];
     let orders = [
-      { id: 'ORD-8921', customerName: 'أحمد محمود', items: 'عطر كيو الملكي x1', total: 1200, payMethod: 'فودافون كاش (Vodafone Cash)', status: 'جديد' }
+      { id: 'ORD-8921', customerName: 'أحمد محمود', items: 'عطر كيو الملكي x1', total: 1200, payMethod: 'فودافون كاش', status: 'جديد' }
     ];
 
+    // Live Chat Store
+    let chatMessages = [
+      { sender: 'العميل', text: 'مرحباً، هل يتوفر لديكم عطر كيو الملكي للتوصيل اليوم؟', type: 'user', time: '10:00 ص' }
+    ];
+
+    let unreadMessagesCount = 1;
     let isAdminLoggedIn = false;
     let currentCustomer = null;
     let deferredPrompt;
 
-    // PWA Service Worker
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
@@ -493,14 +522,10 @@
     function installPWA() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          deferredPrompt = null;
-          document.getElementById('pwaBanner').classList.add('hidden');
-        });
+        deferredPrompt.userChoice.then(() => { deferredPrompt = null; document.getElementById('pwaBanner').classList.add('hidden'); });
       }
     }
 
-    // Initialize Page
     document.addEventListener('DOMContentLoaded', () => {
       renderProducts();
       renderBanners();
@@ -508,9 +533,9 @@
       renderInventory();
       renderCustomers();
       renderAdminBanners();
+      renderChatMessages();
     });
 
-    // View Navigation
     function switchView(view) {
       if (view === 'admin') {
         if (!isAdminLoggedIn) {
@@ -521,6 +546,10 @@
         document.getElementById('adminView').classList.remove('hidden');
         document.getElementById('btnViewAdmin').classList.add('bg-brand-gold', 'text-brand-dark');
         document.getElementById('btnViewStore').classList.remove('bg-brand-gold', 'text-brand-dark');
+        
+        // Clear admin unread badge when admin opens chat tab
+        unreadMessagesCount = 0;
+        updateAdminNotifications();
       } else {
         document.getElementById('adminView').classList.add('hidden');
         document.getElementById('storeView').classList.remove('hidden');
@@ -529,7 +558,6 @@
       }
     }
 
-    // Admin Auth
     function openAdminModal() { document.getElementById('adminLoginModal').classList.remove('hidden'); }
     function closeAdminModal() { document.getElementById('adminLoginModal').classList.add('hidden'); }
     function loginAdmin() {
@@ -549,7 +577,6 @@
       switchView('store');
     }
 
-    // Customer Registration
     function openCustomerAuthModal() { document.getElementById('customerAuthModal').classList.remove('hidden'); }
     function closeCustomerAuthModal() { document.getElementById('customerAuthModal').classList.add('hidden'); }
 
@@ -559,21 +586,17 @@
       const phone = document.getElementById('custPhone').value.trim();
       const address = document.getElementById('custAddress').value.trim();
 
-      if (!name || !mobile || !address) {
-        alert('يرجى إدخال الاسم، رقم الجوال، والعنوان على الأقل.');
-        return;
-      }
+      if (!name || !mobile || !address) { alert('يرجى إدخال البيانات الأساسية.'); return; }
 
-      currentCustomer = { name, mobile, phone, address, date: new Date().toISOString().split('T')[0] };
+      currentCustomer = { name, mobile, phone, address, date: new Date().toLocaleDateString('ar-EG') };
       customers.push(currentCustomer);
       renderCustomers();
 
       document.getElementById('customerAuthLabel').innerText = name;
       closeCustomerAuthModal();
-      alert(`مرحباً بك يا ${name}! تم تسجيل بياناتك بنجاح وأصبحت ظاهرة لدى الإدارة.`);
+      alert(`مرحباً بك يا ${name}! تم تسجيل حسابك.`);
     }
 
-    // Render Banners in Store
     function renderBanners() {
       const container = document.getElementById('bannersContainer');
       container.innerHTML = '';
@@ -590,11 +613,9 @@
       });
     }
 
-    // Render Products Grid (Fully Visible Images)
     function renderProducts(filterText = '') {
       const grid = document.getElementById('productGrid');
       grid.innerHTML = '';
-
       const filtered = products.filter(p => p.name.includes(filterText) || p.category.includes(filterText));
 
       filtered.forEach(p => {
@@ -604,13 +625,12 @@
               <img src="${p.image}" class="w-full h-48 object-cover">
               <span class="absolute top-2 right-2 bg-brand-dark/80 text-brand-gold text-[10px] font-bold px-2 py-0.5 rounded-full">${p.category}</span>
             </div>
-            
             <div class="p-4 flex-1 flex flex-col justify-between">
               <div>
                 <h3 class="font-bold text-slate-800 text-sm mb-1">${p.name}</h3>
-                <p class="text-xs text-slate-500 mb-2">المخزون المتوفر: ${p.stock} قطعة</p>
+                <p class="text-xs text-slate-600 mb-3 bg-slate-50 p-2 rounded-lg border border-slate-100">${p.description || 'بدون وصف'}</p>
+                <p class="text-[11px] text-slate-400 mb-2">المخزون: ${p.stock}</p>
               </div>
-              
               <div class="flex items-center justify-between mt-3 pt-2 border-t">
                 <span class="font-extrabold text-brand-burgundy text-base">${p.price} جنيه</span>
                 <button onclick="addToCart(${p.id})" class="bg-brand-burgundy text-white text-xs px-3 py-1.5 rounded-lg font-bold hover:bg-brand-dark flex items-center gap-1">
@@ -624,19 +644,14 @@
     }
 
     function filterProducts() {
-      const query = document.getElementById('searchInput').value.trim();
-      renderProducts(query);
+      renderProducts(document.getElementById('searchInput').value.trim());
     }
 
-    // Cart Management
     function addToCart(productId) {
       const prod = products.find(p => p.id === productId);
       const existing = cart.find(c => c.id === productId);
-      if (existing) {
-        existing.qty++;
-      } else {
-        cart.push({ ...prod, qty: 1 });
-      }
+      if (existing) existing.qty++;
+      else cart.push({ ...prod, qty: 1 });
       updateCartUI();
     }
 
@@ -665,7 +680,6 @@
           </div>
         `;
       });
-
       document.getElementById('cartTotalAmount').innerText = `${total} جنيه`;
     }
 
@@ -678,15 +692,11 @@
     function toggleCartModal() { document.getElementById('cartModal').classList.toggle('hidden'); }
 
     function submitOrderToChat() {
-      if (cart.length === 0) {
-        alert('السلة فارغة!');
-        return;
-      }
-      
+      if (cart.length === 0) { alert('السلة فارغة!'); return; }
       const payMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
       let orderItemsText = cart.map(c => `${c.name} (x${c.qty})`).join(', ');
       let total = cart.reduce((a, c) => a + (c.price * c.qty), 0);
-      const customerNameStr = currentCustomer ? currentCustomer.name : 'عميل غير مسجل';
+      const customerNameStr = currentCustomer ? currentCustomer.name : 'عميل زائر';
       
       const newOrder = {
         id: 'ORD-' + Math.floor(1000 + Math.random() * 9000),
@@ -700,8 +710,8 @@
       orders.push(newOrder);
       renderOrders();
 
-      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**\nالعميل: ${customerNameStr}\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}\n\n*يرجى تجهيز الطلب.*`;
-      appendChatMessage('العميل', chatMsg, 'user');
+      const chatMsg = `📦 **طلب جديد رقم ${newOrder.id}**\nالعميل: ${customerNameStr}\nالمنتجات: ${orderItemsText}\nالإجمالي: ${total} جنيه\nطريقة الدفع: ${payMethod}`;
+      addMessageToChat('العميل', chatMsg, 'user');
 
       cart = [];
       updateCartUI();
@@ -709,44 +719,100 @@
       toggleChatWindow();
     }
 
-    // Chat Functions
+    // Chat Logic & Notifications
     function toggleChatWindow() { document.getElementById('chatWindow').classList.toggle('hidden'); }
 
     function sendChatMessage() {
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text) return;
-      appendChatMessage('العميل', text, 'user');
+      addMessageToChat('العميل', text, 'user');
       input.value = '';
-
-      setTimeout(() => {
-        appendChatMessage('الإدارة', 'تم استلام رسالتك وجاري تجهيز طلبك بواسطة فريق كيو عطور.', 'admin');
-      }, 1000);
     }
 
-    function appendChatMessage(sender, text, type) {
+    function addMessageToChat(sender, text, type) {
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      chatMessages.push({ sender, text, type, time: timeStr });
+      
+      if (type === 'user') {
+        unreadMessagesCount++;
+        updateAdminNotifications();
+      }
+
+      renderChatMessages();
+    }
+
+    function renderChatMessages() {
+      // Customer window body
       const body = document.getElementById('chatBody');
-      const isUser = type === 'user';
-      body.innerHTML += `
-        <div class="${isUser ? 'bg-brand-burgundy text-white rounded-tl-none mr-auto' : 'bg-slate-200 text-slate-800 rounded-tr-none ml-auto'} p-2.5 rounded-xl max-w-[85%]">
-          <div class="font-bold text-[10px] opacity-75 mb-0.5">${sender}</div>
-          <div>${text.replace(/\n/g, '<br>')}</div>
-        </div>
-      `;
+      body.innerHTML = '';
+      
+      // Admin live chat body
+      const adminBody = document.getElementById('adminLiveChatBody');
+      if (adminBody) adminBody.innerHTML = '';
+
+      chatMessages.forEach(m => {
+        const isUser = m.type === 'user';
+        const msgHtml = `
+          <div class="${isUser ? 'bg-brand-burgundy text-white rounded-tl-none mr-auto' : 'bg-slate-200 text-slate-800 rounded-tr-none ml-auto'} p-2.5 rounded-xl max-w-[85%] mb-2">
+            <div class="flex justify-between items-center mb-0.5 opacity-75 text-[9px]">
+              <span>${m.sender}</span>
+              <span>${m.time}</span>
+            </div>
+            <div>${m.text.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+        body.innerHTML += msgHtml;
+        if (adminBody) adminBody.innerHTML += msgHtml;
+      });
+
       body.scrollTop = body.scrollHeight;
+      if (adminBody) adminBody.scrollTop = adminBody.scrollHeight;
     }
 
     function handleChatFileUpload(input) {
       if (input.files && input.files[0]) {
         const file = input.files[0];
         const fileUrl = URL.createObjectURL(file);
-        appendChatMessage('العميل', `مرفق ملف (${file.name}):<br><img src="${fileUrl}" class="max-w-full h-32 object-cover rounded mt-1">`, 'user');
+        addMessageToChat('العميل', `مرفق ملف (${file.name}):<br><img src="${fileUrl}" class="max-w-full h-32 object-cover rounded mt-1">`, 'user');
       }
+    }
+
+    function updateAdminNotifications() {
+      const badge = document.getElementById('adminNotificationBadge');
+      const tabBadge = document.getElementById('adminChatTabBadge');
+      const clientBadge = document.getElementById('clientChatBadge');
+
+      if (unreadMessagesCount > 0) {
+        badge.innerText = unreadMessagesCount;
+        badge.classList.remove('hidden');
+        tabBadge.innerText = unreadMessagesCount;
+        tabBadge.classList.remove('hidden');
+        clientBadge.classList.add('hidden');
+      } else {
+        badge.classList.add('hidden');
+        tabBadge.classList.add('hidden');
+      }
+    }
+
+    // Admin Reply from Panel
+    function sendAdminReply() {
+      const input = document.getElementById('adminReplyInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      chatMessages.push({ sender: 'الإدارة (ASA)', text, type: 'admin', time: timeStr });
+      input.value = '';
+      
+      renderChatMessages();
+      // Show unread notification on client side
+      document.getElementById('clientChatBadge').classList.remove('hidden');
     }
 
     // Admin Tabs & Management
     function switchAdminTab(tab) {
-      ['Orders', 'Inventory', 'Customers', 'Banners'].forEach(t => {
+      ['Orders', 'AdminChat', 'Inventory', 'Customers', 'Banners'].forEach(t => {
         document.getElementById('tab' + t).classList.add('hidden');
         document.getElementById('tabBtn' + t).classList.remove('border-brand-burgundy', 'text-brand-burgundy');
         document.getElementById('tabBtn' + t).classList.add('border-transparent', 'text-slate-500');
@@ -795,7 +861,10 @@
           <tr class="border-b hover:bg-slate-50">
             <td class="p-3"><img src="${p.image}" class="w-12 h-12 rounded object-cover shadow"></td>
             <td class="p-3 font-bold">${p.name}</td>
-            <td class="p-3">${p.category}</td>
+            <td class="p-3">
+              <span class="text-xs text-brand-burgundy font-bold">${p.category}</span>
+              <p class="text-[11px] text-slate-500 truncate max-w-xs">${p.description || ''}</p>
+            </td>
             <td class="p-3">${p.price} جنيه</td>
             <td class="p-3">${p.stock}</td>
             <td class="p-3">
@@ -815,19 +884,33 @@
     function openAddProductModal() { document.getElementById('addProductModal').classList.remove('hidden'); }
     function closeAddProductModal() { document.getElementById('addProductModal').classList.add('hidden'); }
 
+    // Save Product with Local File Image Selection
     function saveNewProduct() {
       const name = document.getElementById('newProdName').value;
       const cat = document.getElementById('newProdCat').value;
       const price = parseFloat(document.getElementById('newProdPrice').value);
       const stock = parseInt(document.getElementById('newProdStock').value);
-      const img = document.getElementById('newProdImg').value || 'https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80';
+      const desc = document.getElementById('newProdDesc').value.trim();
+      const fileInput = document.getElementById('newProdFileImg');
 
       if (!name || isNaN(price)) { alert('يرجى كتابة الاسم والسعر الصحيح'); return; }
 
-      products.push({ id: Date.now(), name, category: cat, price, stock, image: img });
+      let imageUrl = "https://images.unsplash.com/photo-1594035910387-fea47794261f?w=500&q=80";
+      
+      if (fileInput.files && fileInput.files[0]) {
+        imageUrl = URL.createObjectURL(fileInput.files[0]);
+        addProductWithImage(name, cat, price, stock, desc, imageUrl);
+      } else {
+        addProductWithImage(name, cat, price, stock, desc, imageUrl);
+      }
+    }
+
+    function addProductWithImage(name, cat, price, stock, desc, image) {
+      products.push({ id: Date.now(), name, category: cat, price, stock, image, description: desc });
       renderInventory();
       renderProducts();
       closeAddProductModal();
+      alert('تم حفظ المنتج وعرضه في المتجر بنجاح!');
     }
 
     function renderCustomers() {
@@ -838,7 +921,7 @@
           <tr class="border-b hover:bg-slate-50">
             <td class="p-3 font-bold text-slate-800">${c.name}</td>
             <td class="p-3">${c.mobile}</td>
-            <td class="p-3">${c.phone || 'غير مسجل'}</td>
+            <td class="p-3">${c.phone || '-'}</td>
             <td class="p-3">${c.address}</td>
             <td class="p-3 text-xs text-slate-500">${c.date}</td>
           </tr>
@@ -847,7 +930,6 @@
       document.getElementById('customerBadge').innerText = customers.length;
     }
 
-    // Banners Management
     function renderAdminBanners() {
       const container = document.getElementById('adminBannersList');
       container.innerHTML = '';
@@ -868,17 +950,25 @@
     function openAddBannerModal() { document.getElementById('addBannerModal').classList.remove('hidden'); }
     function closeAddBannerModal() { document.getElementById('addBannerModal').classList.add('hidden'); }
 
+    // Save Banner with Local File Image Selection
     function saveNewBanner() {
       const title = document.getElementById('bannerTitle').value;
       const subtitle = document.getElementById('bannerSubtitle').value;
-      const img = document.getElementById('bannerImg').value || 'https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80';
+      const fileInput = document.getElementById('bannerFileImg');
 
       if (!title) { alert('يرجى كتابة عنوان البنر'); return; }
 
-      banners.push({ id: Date.now(), title, subtitle, image: img });
+      let imageUrl = "https://images.unsplash.com/photo-1615397349754-cfa2066a298e?w=500&q=80";
+
+      if (fileInput.files && fileInput.files[0]) {
+        imageUrl = URL.createObjectURL(fileInput.files[0]);
+      }
+
+      banners.push({ id: Date.now(), title, subtitle, image: imageUrl });
       renderBanners();
       renderAdminBanners();
       closeAddBannerModal();
+      alert('تم إضافة وعرض البنر في المتجر بنجاح!');
     }
 
     function deleteBanner(idx) {
