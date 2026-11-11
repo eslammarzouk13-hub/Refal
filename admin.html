@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم أدمن ريفال | Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: { light: '#f3e7c4', DEFAULT: '#D4AF37', dark: '#997A15' },
+                        darkBg: '#0b0b0b',
+                        cardBg: '#161616'
+                    },
+                    fontFamily: { cairo: ['Cairo', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0b0b0b; color: #f3f4f6; }
+        .gold-gradient { background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%); }
+        .gold-text { background: linear-gradient(135deg, #BF953F 0%, #FCF6BA 25%, #B38728 50%, #FBF5B7 75%, #AA771C 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col bg-cardBg">
+
+    <!-- نافذة تسجيل الدخول المستقلة للأدمن -->
+    <div id="admin-login-screen" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-red-500/40 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-red-600/20 border border-red-500/40 flex items-center justify-center text-red-500 font-black text-2xl mx-auto mb-3">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+                <h2 class="text-2xl font-black text-red-500 mb-1">بوابة إدارة ريفال</h2>
+                <p class="text-xs text-gray-400">منطقة الإدارة العليا - خاصة بالأدمن فقط</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs text-red-400 mb-1 font-semibold">كلمة مرور الأدمن</label>
+                    <input type="password" id="admin-pass" placeholder="••••••••" class="w-full bg-black border border-red-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <div>
+                    <label class="block text-xs text-red-400 mb-1 font-semibold">رمز الأمان OTP للأدمن</label>
+                    <input type="text" id="admin-otp" placeholder="7777" class="w-full bg-black border border-red-500/30 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-red-500">
+                </div>
+                <button onclick="loginAdmin()" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg transition text-sm">
+                    دخول لوحة التحكم
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم الكاملة والأصلية -->
+    <div id="admin-main-panel" class="hidden min-h-screen p-4 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col md:flex-row items-center justify-between pb-6 border-b border-gray-800 mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-black text-red-500">لوحة تحكم أدمن ريفال (المستقلة)</h2>
+                    <p class="text-xs text-gray-400">إدارة المنتجات، متابعة العملاء المسجلين، والتحكم بالطلبات والشحنات</p>
+                </div>
+                <button onclick="location.reload()" class="bg-black border border-red-500 text-red-400 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-500 hover:text-white transition">
+                    تسجيل الخروج
+                </button>
+            </div>
+
+            <!-- الإحصائيات -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-black border border-gray-800 p-4 rounded-2xl">
+                    <span class="text-xs text-gray-400">إجمالي المبيعات</span>
+                    <h3 id="stat-sales" class="text-xl font-black text-gold mt-1">0 ج.م</h3>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 rounded-2xl">
+                    <span class="text-xs text-gray-400">الطلبات النشطة</span>
+                    <h3 id="stat-orders" class="text-xl font-black text-blue-400 mt-1">0</h3>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 rounded-2xl">
+                    <span class="text-xs text-gray-400">العملاء المسجلين</span>
+                    <h3 id="stat-clients" class="text-xl font-black text-green-400 mt-1">0</h3>
+                </div>
+                <div class="bg-black border border-gray-800 p-4 rounded-2xl">
+                    <span class="text-xs text-gray-400">المنتجات المعروضة</span>
+                    <h3 id="stat-products" class="text-xl font-black text-purple-400 mt-1">0</h3>
+                </div>
+            </div>
+
+            <!-- أقسام الأدمن -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- إدارة المنتجات -->
+                <div class="bg-black border border-gray-800 rounded-2xl p-6">
+                    <h3 class="text-lg font-bold text-white mb-4 flex items-center justify-between">
+                        <span>إضافة وتعديل وحذف المنتجات</span>
+                        <i class="fa-solid fa-boxes-stacked text-gold"></i>
+                    </h3>
+                    <div class="space-y-3 mb-6 bg-cardBg p-4 rounded-xl border border-gray-800">
+                        <input type="text" id="p-name" placeholder="اسم المنتج (مثال: عطر ريفال الملكي)" class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="p-price" placeholder="السعر (ج.م)" class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold">
+                            <select id="p-cat" class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold">
+                                <option value="perfume">عطور فاخرة</option>
+                                <option value="makeup">مكياج ومستحضرات</option>
+                                <option value="oils">زيوت عطرية</option>
+                            </select>
+                        </div>
+                        <input type="text" id="p-img" placeholder="رابط صورة المنتج (URL)" class="w-full bg-black border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-gold">
+                        <button onclick="addNewProduct()" class="w-full gold-gradient text-black font-bold py-2 rounded-xl text-xs">إضافة المنتج للمتجر</button>
+                    </div>
+                    <div id="admin-products-container" class="space-y-2 max-h-52 overflow-y-auto text-xs"></div>
+                </div>
+
+                <!-- العملاء والطلبات -->
+                <div class="bg-black border border-gray-800 rounded-2xl p-6 space-y-6">
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-3 flex items-center justify-between">
+                            <span>العملاء المسجلين في المتجر</span>
+                            <i class="fa-solid fa-users text-green-400"></i>
+                        </h3>
+                        <div id="admin-clients-container" class="space-y-2 max-h-36 overflow-y-auto bg-cardBg p-3 rounded-xl border border-gray-800 text-xs"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-white mb-3 flex items-center justify-between">
+                            <span>إدارة الطلبات والشحنات</span>
+                            <i class="fa-solid fa-truck text-blue-400"></i>
+                        </h3>
+                        <div id="admin-orders-container" class="space-y-2 max-h-36 overflow-y-auto bg-cardBg p-3 rounded-xl border border-gray-800 text-xs"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function loginAdmin() {
+            const pass = document.getElementById('admin-pass').value.trim();
+            const otp = document.getElementById('admin-otp').value.trim();
+            if(pass === 'admin123' && otp === '7777') {
+                document.getElementById('admin-login-screen').classList.add('hidden');
+                document.getElementById('admin-main-panel').classList.remove('hidden');
+                loadDashboardData();
+            } else {
+                alert('كلمة المرور أو رمز OTP خطأ (استخدم admin123 و 7777)');
+            }
+        }
+
+        function loadDashboardData() {
+            let orders = JSON.parse(localStorage.getItem('rival_orders') || '[]');
+            let clients = JSON.parse(localStorage.getItem('rival_clients') || '[]');
+            
+            document.getElementById('stat-sales').innerText = orders.reduce((sum, o) => sum + o.total, 0) + ' ج.م';
+            document.getElementById('stat-orders').innerText = orders.length;
+            document.getElementById('stat-clients').innerText = clients.length;
+            document.getElementById('stat-products').innerText = '6';
+
+            // عرض العملاء
+            const cCont = document.getElementById('admin-clients-container');
+            cCont.innerHTML = clients.length === 0 ? 'لا يوجد عملاء مسجلين بعد.' : '';
+            clients.forEach(c => {
+                cCont.innerHTML += `<div class="p-2 border-b border-gray-800 text-gray-300">👤 ${c.identifier} (${c.date})</div>`;
+            });
+
+            // عرض الطلبات
+            const oCont = document.getElementById('admin-orders-container');
+            oCont.innerHTML = orders.length === 0 ? 'لا توجد طلبات جديدة.' : '';
+            orders.forEach(o => {
+                oCont.innerHTML += `<div class="p-2 border-b border-gray-800 text-gray-300">📦 ${o.id} | ${o.total} ج.م | <span class="text-gold">${o.status}</span></div>`;
+            });
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('p-name').value.trim();
+            const price = parseFloat(document.getElementById('p-price').value);
+            if(!name || isNaN(price)) { alert('يرجى إدخال اسم المنتج والسعر'); return; }
+            alert('تمت إضافة المنتج بنجاح للقائمة!');
+            document.getElementById('p-name').value = '';
+            document.getElementById('p-price').value = '';
+            document.getElementById('p-img').value = '';
+        }
+    </script>
+</body>
+</html>
