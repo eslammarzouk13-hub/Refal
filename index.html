@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👷‍♂️ نظام البصمة الذكي - مشرف الموقع</title>
+    <style>
+        :root { --primary: #0284c7; --success: #16a34a; --danger: #dc2626; --bg: #f8fafc; --card: #ffffff; --text: #1e293b; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif; }
+        body { background: var(--bg); color: var(--text); padding: 15px; direction: rtl; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgb(0 0 / 0.1); margin-bottom: 15px; }
+        h1 { font-size: 1.25rem; text-align: center; margin-bottom: 15px; color: var(--primary); }
+        .tabs { display: flex; gap: 10px; margin-bottom: 15px; }
+        .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: #e2e8f0; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; }
+        select, input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 1rem; }
+        .btn { width: 100%; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; color: white; margin-top: 5px; }
+        .btn-in { background: var(--success); }
+        .btn-out { background: var(--danger); }
+        .btn-admin { background: #475569; }
+        .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
+        .stat-box { background: #f1f5f9; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-box h3 { font-size: 1.5rem; color: var(--primary); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
+        th, td { padding: 8px; text-align: center; border-bottom: 1px solid #e2e8f0; }
+        th { background: #f8fafc; color: #64748b; }
+        .hidden { display: none; }
+        .alert { padding: 10px; border-radius: 6px; margin-bottom: 10px; text-align: center; font-weight: bold; font-size: 0.9rem; }
+        .alert-success { background: #dcfce7; color: #166534; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h1>👷‍♂️ نظام البصمة الآلي للموقع</h1>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('employee')">تسجيل الموظف</button>
+            <button class="tab-btn" onclick="switchTab('admin')">لوحة المشرف</button>
+        </div>
+
+        <!-- واجهة الموظف -->
+        <div id="employeeView">
+            <div id="msg"></div>
+            <div class="form-group">
+                <label>اختر اسمك (من الـ 40 موظف):</label>
+                <select id="empSelect">
+                    <option value="">-- حدد اسم الموظف --</option>
+                </select>
+            </div>
+            <button class="btn btn-in" onclick="recordAttendance('حضور')">تسجيل حضور ☀️</button>
+            <button class="btn btn-out" onclick="recordAttendance('انصراف')" style="margin-top: 10px;">تسجيل انصراف 🌇</button>
+        </div>
+
+        <!-- واجهة المشرف -->
+        <div id="adminView" class="hidden">
+            <div id="loginSection">
+                <div class="form-group">
+                    <label>الرمز السري للمشرف:</label>
+                    <input type="password" id="pinCode" placeholder="أدخل الرمز (1234)">
+                </div>
+                <button class="btn btn-admin" onclick="checkPin()">دخول لوحة التحكم</button>
+            </div>
+
+            <div id="dashboardSection" class="hidden">
+                <div class="stats">
+                    <div class="stat-box">
+                        <h3 id="presentCount">0</h3>
+                        <p>الحاضرون اليوم</p>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="absentCount">40</h3>
+                        <p>الغائبون / لم يبصموا</p>
+                    </div>
+                </div>
+                
+                <h4 style="margin-bottom: 5px; font-size: 0.95rem;">سجل البصمات المباشر:</h4>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الموظف</th>
+                                <th>الحالة</th>
+                                <th>الوقت</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logTableBody">
+                            <!-- سجلات البصمة هنا -->
+                        </tbody>
+                    </table>
+                </div>
+                <button class="btn btn-admin" onclick="exportData()" style="margin-top: 15px; background: #0284c7;">📥 تصدير تقرير Excel (CSV)</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // توليد أسماء الـ 40 موظفاً تلقائياً
+    const employees = [];
+    for(let i = 1; i <= 40; i++) {
+        employees.push(`موظف رقم ${1000 + i}`);
+    }
+
+    const select = document.getElementById('empSelect');
+    employees.forEach(name => {
+        let opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        select.appendChild(opt);
+    });
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        if(tab === 'employee') {
+            document.querySelector('.tab-btn:nth-child(1)').classList.add('active');
+            document.getElementById('employeeView').classList.remove('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+        } else {
+            document.querySelector('.tab-btn:nth-child(2)').classList.add('active');
+            document.getElementById('employeeView').classList.add('hidden');
+            document.getElementById('adminView').classList.remove('hidden');
+        }
+    }
+
+    function checkPin() {
+        const pin = document.getElementById('pinCode').value;
+        if(pin === '1234') {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            updateDashboard();
+        } else {
+            alert('الرمز السري خطأ (الرمز الافتراضي: 1234)');
+        }
+    }
+
+    function recordAttendance(type) {
+        const name = document.getElementById('empSelect').value;
+        const msgDiv = document.getElementById('msg');
+        if(!name) {
+            msgDiv.innerHTML = '<div class="alert" style="background:#fee2e2; color:#991b1b;">الرجاء اختيار اسم الموظف أولاً</div>';
+            return;
+        }
+
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+        const dateString = now.toLocaleDateString('ar-SA');
+
+        let logs = JSON.parse(localStorage.getItem('attendance_logs') || '[]');
+        
+        // التحقق إن كان قد سجل مسبقاً اليوم
+        logs.push({ name, type, time: timeString, date: dateString });
+        localStorage.setItem('attendance_logs', JSON.stringify(logs));
+
+        msgDiv.innerHTML = `<div class="alert alert-success">تم تسجيل (${type}) بنجاح للموظف: ${name} الساعة ${timeString}</div>`;
+        document.getElementById('empSelect').value = '';
+    }
+
+    function updateDashboard() {
+        const logs = JSON.parse(localStorage.getItem('attendance_logs') || '[]');
+        const today = new Date().toLocaleDateString('ar-SA');
+        
+        // تصفية بصمات اليوم
+        const todayLogs = logs.filter(l => l.date === today);
+        
+        const presentEmployees = [...new Set(todayLogs.map(l => l.name))];
+        document.getElementById('presentCount').textContent = presentEmployees.length;
+        document.getElementById('absentCount').textContent = 40 - presentEmployees.length;
+
+        const tbody = document.getElementById('logTableBody');
+        tbody.innerHTML = '';
+        
+        todayLogs.reverse().forEach(log => {
+            let tr = document.createElement('tr');
+            tr.innerHTML = `<td>${log.name}</td><td style="color:${log.type==='حضور'?'#16a34a':'#dc2626'}; font-weight:bold;">${log.type}</td><td>${log.time}</td>`;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function exportData() {
+        const logs = JSON.parse(localStorage.getItem('attendance_logs') || '[]');
+        let csvContent = "data:text/csv;charset=utf-8,\uFEFFاسم الموظف,الحالة,الوقت,التاريخ\n";
+        logs.forEach(l => {
+            csvContent += `${l.name},${l.type},${l.time},${l.date}\n`;
+        });
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "attendance_report.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    // تحديث لوحة المشرف تلقائياً كل ثانيتين إذا كانت مفتوحة
+    setInterval(() => {
+        if(!document.getElementById('dashboardSection').classList.contains('hidden')) {
+            updateDashboard();
+        }
+    }, 2000);
+</script>
+
+</body>
+</html>
